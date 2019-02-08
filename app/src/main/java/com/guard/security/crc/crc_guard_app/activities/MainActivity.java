@@ -1,7 +1,9 @@
-package com.guard.security.crc.crc_guard_app;
+package com.guard.security.crc.crc_guard_app.activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.guard.security.crc.crc_guard_app.R;
 
 public class MainActivity extends AppCompatActivity {
 

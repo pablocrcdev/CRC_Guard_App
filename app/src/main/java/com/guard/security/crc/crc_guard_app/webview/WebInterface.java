@@ -1,0 +1,38 @@
+package com.guard.security.crc.crc_guard_app.webview;
+
+import android.content.Context;
+import android.webkit.JavascriptInterface;
+
+import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
+
+public class WebInterface {
+    private Context gvContext;
+    private GPSRastreador gvGPS;
+    //Constructor de la clase que solo recibe el contexto de la apicacion
+    public WebInterface(Context pContext, GPSRastreador pGps) {
+        this.gvContext = pContext;
+        this.gvGPS = pGps;
+    }
+
+    @JavascriptInterface
+    public String getLatitude() {
+        gvGPS = new GPSRastreador(this.gvContext);
+        if (gvGPS.poderObtenerLocacion()) {
+            return String.valueOf(gvGPS.obtenerLatitud());
+        } else {
+            gvGPS.mostrarAlertaConfiguracion();
+            return "";
+        }
+    }
+
+    @JavascriptInterface
+    public String getLongitude() {
+        gvGPS = new GPSRastreador(this.gvContext);
+        if (gvGPS.poderObtenerLocacion()) {
+            return String.valueOf(gvGPS.obtenerLongitud());
+        } else {
+            gvGPS.mostrarAlertaConfiguracion();
+            return "";
+        }
+    }
+}
