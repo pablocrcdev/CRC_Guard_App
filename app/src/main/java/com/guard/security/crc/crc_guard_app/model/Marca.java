@@ -3,19 +3,36 @@ package com.guard.security.crc.crc_guard_app.model;
 import java.util.Date;
 
 public class Marca {
+    private int dbId;
     private String imei;
     private String nfcData;
-    private Date horaMarca;
-    private double lat;
-    private double lng;
+    private String horaMarca;
+    private String lat;
+    private String lng;
     private String estado;
 
-    public Marca(String pImei, String pNfcData, Date pHoraMarca, double pLat, double pLng){
+    public Marca(int pDbId, String pImei, String pNfcData, String pHoraMarca, String pLat, String pLng){
+        this.dbId = pDbId;
         this.imei = pImei;
         this.nfcData = pNfcData;
         this.horaMarca = pHoraMarca;
         this.lat = pLat;
         this.lng = pLng;
+    }
+    public Marca(String pImei, String pNfcData, String pHoraMarca, String pLat, String pLng){
+        this.imei = pImei;
+        this.nfcData = pNfcData;
+        this.horaMarca = pHoraMarca;
+        this.lat = pLat;
+        this.lng = pLng;
+    }
+
+    public int getDbId() {
+        return dbId;
+    }
+
+    public void setDbId(int dbId) {
+        this.dbId = dbId;
     }
 
     public String getNfcData() {
@@ -26,27 +43,27 @@ public class Marca {
         this.nfcData = nfcData;
     }
 
-    public Date getHoraMarca() {
+    public String getHoraMarca() {
         return horaMarca;
     }
 
-    public void setHoraMarca(Date horaMarca) {
+    public void setHoraMarca(String horaMarca) {
         this.horaMarca = horaMarca;
     }
 
-    public double getLat() {
+    public String getLat() {
         return lat;
     }
 
-    public void setLat(double lat) {
+    public void setLat(String lat) {
         this.lat = lat;
     }
 
-    public double getLng() {
+    public String getLng() {
         return lng;
     }
 
-    public void setLng(double lng) {
+    public void setLng(String lng) {
         this.lng = lng;
     }
 
