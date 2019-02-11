@@ -37,6 +37,7 @@ import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
+import com.guard.security.crc.crc_guard_app.webview.ManagerChromeClient;
 import com.guard.security.crc.crc_guard_app.webview.ManagerWebClient;
 import com.guard.security.crc.crc_guard_app.webview.WebInterface;
 
@@ -50,7 +51,8 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
-    private String mURL = "http://201.196.88.8:9090/crccoding/";
+    //private String mURL = "http://201.196.88.8:9091/crccoding/f?p=2560";
+    private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560";
 
     private SQLiteDatabase db;
     private DatabaseHandler dbhelper;
@@ -68,6 +70,52 @@ public class MainActivity extends AppCompatActivity {
     private int gvALL_PERMISSION = 0;
 
     private int REQUEST_READ_PHONE_STATE = 1;
+    //********************************************************************************************//
+    // Metodos de inicializacion
+    //********************************************************************************************//
+    private void initUIComponents() {
+        gvWebView = (WebView) findViewById(R.id.WebView);
+        gvProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        gvContext = this;
+        if (gvNfcAdapter == null) {
+            Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
+            finish();
+        } else if (!gvNfcAdapter.isEnabled()) {
+            Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void initWebviewComponents() {
+        // Seteo de Cliente Web, para manejo de navegador interno
+        gvWebView.setWebViewClient(new ManagerWebClient(this));
+        // Habilitacion de Javascript en el webview
+        gvWebView.getSettings().setJavaScriptEnabled(true);
+        // Inicializacion de interfaz de javascript entre webview y app android
+        gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS), "Android");
+        // Permite el acceso a documentos
+        gvWebView.getSettings().setAllowFileAccess(true);
+        // Carga de URL en el elemento Webview
+        gvWebView.loadUrl(mURL);
+
+        gvWebView.setWebChromeClient(new ManagerChromeClient(this));
+
+    }
+
+    private void initDb() {
+        //Abrimos la base de datos 'DBTest1' en modo escritura
+        dbhelper = new DatabaseHandler(this, "RG", null, 1);
+        db = dbhelper.getWritableDatabase();
+    }
+
+    private void initNFCComponents(){
+        readFromIntent(getIntent());
+
+        gvPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+        tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
+    }
+
     //********************************************************************************************//
     // Metodos de validacion
     //********************************************************************************************//
@@ -121,78 +169,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected void validarAccesos(){
-        int permissionCheck = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_PHONE_STATE);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_PHONE_STATE},
-                    REQUEST_READ_PHONE_STATE);
-
-        } else {
-            //TODO
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 1:
-                if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-
-                }
-                break;
-
-            default:
-                break;
-        }
-    }
-    //********************************************************************************************//
-    // Metodos de inicializacion
-    //********************************************************************************************//
-    private void initUIComponents() {
-        gvWebView = (WebView) findViewById(R.id.WebView);
-        gvProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        gvContext = this;
-        /*if (gvNfcAdapter == null) {
-            Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
-            finish();
-        } else if (!gvNfcAdapter.isEnabled()) {
-            Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
-        }*/
-
-    }
-
-    private void initWebviewComponents() {
-
-
-        // Seteo de Cliente Web, para manejo de navegador interno
-        gvWebView.setWebViewClient(new ManagerWebClient(this));
-        // Habilitacion de Javascript en el webview
-        gvWebView.getSettings().setJavaScriptEnabled(true);
-        // Inicializacion de interfaz de javascript entre webview y app android
-        //gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS, obtenerIdentificador()), "Android");
-        // Permite el acceso a documentos
-        gvWebView.getSettings().setAllowFileAccess(true);
-        // Carga de URL en el elemento Webview
-        gvWebView.loadUrl(mURL);
-
-    }
-
-    private void initDb() {
-        //Abrimos la base de datos 'DBTest1' en modo escritura
-        dbhelper = new DatabaseHandler(this, "RG", null, 1);
-        db = dbhelper.getWritableDatabase();
-    }
-
-    private void initNFCComponents(){
-        readFromIntent(getIntent());
-
-        gvPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
-        tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
-    }
     //********************************************************************************************//
     // Metodos para interactuar con la base de datos
     //********************************************************************************************//
@@ -207,12 +183,14 @@ public class MainActivity extends AppCompatActivity {
             nuevoRegistro.put("hora_marca", pMarca.getHoraMarca().toString());
             nuevoRegistro.put("latitud", pMarca.getLat());
             nuevoRegistro.put("longitud", pMarca.getLng());
+            nuevoRegistro.put("ind_estado", "PRC");
+
 
             //Insertamos el registro en la base de datos
             db.insert("marca_reloj", null, nuevoRegistro);
         }
     }
-
+    /*
     private void obtenerMarcasDispositivo(){
         // Seleccionamos todos los registros de la tabla Cars
         Cursor cursor = db.rawQuery("select * from marca_reloj where ind_estado = 'PEN'", null);
@@ -245,6 +223,41 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+    */
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        if (validarEstadoRed()) {
+            if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
+                solicitarAccesos();
+            }
+            initUIComponents();
+            initWebviewComponents();
+            initDb();
+            initNFCComponents();
+        } else {
+            new ErrorController(this).showNetworkDialog();
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent pIntent) {
+        setIntent(pIntent);
+        readFromIntent(pIntent);
+        if(NfcAdapter.ACTION_TAG_DISCOVERED.equals(pIntent.getAction())){
+            gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        // cerramos conexión base de datos antes de destruir el activity
+        db.close();
+        super.onDestroy();
+    }
+
     //********************************************************************************************//
     // Metodos para usar el servicio de NFC
     //********************************************************************************************//
@@ -288,7 +301,6 @@ public class MainActivity extends AppCompatActivity {
         Date date = new Date();
         gvGPS = new GPSRastreador(this);
         //tvNFCContent.setText("NFC Content: " + text);
-        //gvWebView.loadUrl("javascript:" + "readNFCTag('" + text + "');");
         Marca marca = new Marca(obtenerIdentificador(),
                 text,
                 dateFormat.format(date).toString(),
@@ -296,6 +308,17 @@ public class MainActivity extends AppCompatActivity {
                 Double.toString(gvGPS.obtenerLongitud()));
         registrarMarca(marca);
 
+        //String v = gvWebView.getUrl();
+        gvWebView.loadUrl("javascript:receiveData('" + marca.getImei() + "'" +
+                ",'" + marca.getNfcData() + "'" +
+                ",'" + marca.getHoraMarca() + "'" +
+                ",'" + marca.getLat() + "'" +
+                ",'" + marca.getLng() + "'" +
+                ",'" + "NFC" + "');");
+        //gvWebView.reload();
+
+        //gvWebView.loadUrl("javascript:" + "readNFCTag(" + text + ");");
+        //gvWebView.loadUrl("javascript:(function(){ alert ('"+text+"')})();");
     }
 
     public void sonarAlarma(){
@@ -308,38 +331,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        if (validarEstadoRed()) {
-            if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
-                solicitarAccesos();
-            }
-            //validarAccesos();
-            initUIComponents();
-            initWebviewComponents();
-            initDb();
-            //initNFCComponents();
-        } else {
-            new ErrorController(this).showNetworkDialog();
-        }
-    }
-
-    @Override
-    protected void onNewIntent(Intent pIntent) {
-        setIntent(pIntent);
-        readFromIntent(pIntent);
-        if(NfcAdapter.ACTION_TAG_DISCOVERED.equals(pIntent.getAction())){
-            gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        // cerramos conexión base de datos antes de destruir el activity
-        db.close();
-        super.onDestroy();
-    }
 }

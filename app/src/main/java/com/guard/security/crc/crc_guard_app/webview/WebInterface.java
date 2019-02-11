@@ -13,13 +13,12 @@ import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
 public class WebInterface {
     private Context gvContext;
     private GPSRastreador gvGPS;
-    private String idDevice;
+    //private String idDevice;
 
     //Constructor de la clase que solo recibe el contexto de la apicacion
-    public WebInterface(Context pContext, GPSRastreador pGps, String pIdDevice) {
+    public WebInterface(Context pContext, GPSRastreador pGps){//, String pIdDevice) {
         this.gvContext = pContext;
         this.gvGPS = pGps;
-        this.idDevice = pIdDevice;
     }
 
     @JavascriptInterface
@@ -43,11 +42,12 @@ public class WebInterface {
             return "";
         }
     }
-
+    /*
     @JavascriptInterface
     public String getIdDevice() {
         return idDevice;
-    }
+    }*/
+
 
 
 

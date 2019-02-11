@@ -58,11 +58,11 @@
         android:id="@+id/textViewHoraMarca"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="324dp"
-        android:layout_marginLeft="324dp"
+        android:layout_marginLeft="267dp"
+        android:layout_marginStart="267dp"
         android:layout_marginTop="27dp"
         android:text="horamarca"
         android:textStyle="bold" />
@@ -84,11 +84,7 @@
         android:id="@+id/textViewNfcData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="235dp"
-        android:layout_marginLeft="235dp"
-        android:layout_marginTop="30dp"
+        android:layout_alignTop="@+id/textViewNumMarca"
+        android:layout_centerHorizontal="true"
         android:text="localizacion" />
 </RelativeLayout>

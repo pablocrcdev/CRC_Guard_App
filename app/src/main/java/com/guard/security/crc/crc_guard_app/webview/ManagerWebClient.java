@@ -54,7 +54,10 @@ public class ManagerWebClient extends WebViewClient {
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         //
-        view.setVisibility(View.INVISIBLE);
-        new ErrorController(gvContext).showErrorDialog();
+
+        Intent intent = new Intent(gvContext, LocalHomeActivity.class);
+        gvContext.startActivity(intent);
+        //view.setVisibility(View.INVISIBLE);
+        //new ErrorController(gvContext).showErrorDialog();
     }
 }
