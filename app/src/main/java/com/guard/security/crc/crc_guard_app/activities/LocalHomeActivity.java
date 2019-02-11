@@ -160,8 +160,8 @@ public class LocalHomeActivity extends AppCompatActivity {
                 String horaMarca = cursor.getString(cursor.getColumnIndex("hora_marca"));
                 String lat = cursor.getString(cursor.getColumnIndex("latitud"));
                 String lng = cursor.getString(cursor.getColumnIndex("longitud"));
-
-                list.add(new Marca(dbId, idDevice, nfcData, horaMarca, lat, lng));
+                String estado = cursor.getString(cursor.getColumnIndex("ind_estado"));
+                list.add(new Marca(dbId, idDevice, nfcData, horaMarca, lat, lng, estado));
 
                 cursor.moveToNext();
             }
@@ -206,7 +206,6 @@ public class LocalHomeActivity extends AppCompatActivity {
             nuevoRegistro.put("hora_marca", new Date().toString());
             nuevoRegistro.put("latitud", "latitud");
             nuevoRegistro.put("longitud", "longitud");
-
             //Insertamos el registro en la base de datos
             db.insert("marca_reloj", null, nuevoRegistro);
         }
@@ -294,7 +293,7 @@ public class LocalHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_local_home);
         //Se elimina la versión anterior de la tabla
-        validarAccesos();
+        //validarAccesos();
         if (validarEstadoRed()) {
             if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
                 solicitarAccesos();
@@ -303,7 +302,6 @@ public class LocalHomeActivity extends AppCompatActivity {
             marcas = new ArrayList<Marca>();
 
             btnCreate = (Button) findViewById(R.id.buttonCreate);
-            btnDelete = (Button) findViewById(R.id.buttonDelete);
 
             btnCreate.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -312,21 +310,15 @@ public class LocalHomeActivity extends AppCompatActivity {
                     actualizarListView();
                 }
             });
-            btnDelete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //
-                }
-            });
             //Abrimos la base de datos 'DBTest1' en modo escritura
-            dbHelper = new DatabaseHandler(this, "RG", null, 2);
+            dbHelper = new DatabaseHandler(this, "RG", null, 1);
             db = dbHelper.getWritableDatabase();
             //initNFCComponents();
 
             adapter = new MarcaAdapter(this, marcas, R.layout.items_template);
             listView.setAdapter(adapter);
 
-            //actualizarListView();
+            actualizarListView();
 
         }else{
             new ErrorController(this).showNetworkDialog();

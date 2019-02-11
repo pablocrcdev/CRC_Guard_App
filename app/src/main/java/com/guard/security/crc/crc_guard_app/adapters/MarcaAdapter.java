@@ -57,7 +57,7 @@ public class MarcaAdapter extends BaseAdapter {
 
         Marca currentMarca = list.get(position);
 
-        vh.numMarca.setText(currentMarca.getDbId());
+        vh.numMarca.setText(currentMarca.getDbId()+"");
         vh.idDevice.setText(currentMarca.getImei());
         vh.nfcData.setText(currentMarca.getNfcData());
         vh.horaMarca.setText(currentMarca.getHoraMarca());

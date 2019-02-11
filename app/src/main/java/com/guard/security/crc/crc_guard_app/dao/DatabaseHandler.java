@@ -17,7 +17,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 "hora_marca datetime," +
                 "latitud text," +
                 "longitud text," +
-                "ind_estado text default 'PEN')");
+                "ind_estado text default \"PEN\")");
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int prevVersion, int newVersion) {
@@ -32,7 +32,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 "hora_marca datetime," +
                 "latitud text," +
                 "longitud text," +
-                "ind_estado text default 'PEN')");
+                "ind_estado text default \"PEN\")");
 
     }
 

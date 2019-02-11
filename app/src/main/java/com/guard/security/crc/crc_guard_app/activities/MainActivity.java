@@ -155,12 +155,12 @@ public class MainActivity extends AppCompatActivity {
         gvProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         gvContext = this;
-        if (gvNfcAdapter == null) {
+        /*if (gvNfcAdapter == null) {
             Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
             finish();
         } else if (!gvNfcAdapter.isEnabled()) {
             Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
-        }
+        }*/
 
     }
 
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
             // Habilitacion de Javascript en el webview
             gvWebView.getSettings().setJavaScriptEnabled(true);
             // Inicializacion de interfaz de javascript entre webview y app android
-            gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS, obtenerIdentificador()), "Android");
+            //gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS, obtenerIdentificador()), "Android");
             // Permite el acceso a documentos
             gvWebView.getSettings().setAllowFileAccess(true);
             // Carga de URL en el elemento Webview
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initDb() {
         //Abrimos la base de datos 'DBTest1' en modo escritura
-        dbhelper = new DatabaseHandler(this, "RG", null, 2);
+        dbhelper = new DatabaseHandler(this, "RG", null, 1);
         db = dbhelper.getWritableDatabase();
     }
 
@@ -233,7 +233,8 @@ public class MainActivity extends AppCompatActivity {
                 String horaMarca = cursor.getString(cursor.getColumnIndex("hora_marca"));
                 String lat = cursor.getString(cursor.getColumnIndex("latitud"));
                 String lng = cursor.getString(cursor.getColumnIndex("longitud"));
-                list.add(new Marca(dbId, idDevice, nfcData, horaMarca, lat, lng));
+                String estado = cursor.getString(cursor.getColumnIndex("ind_estado"));
+                list.add(new Marca(dbId, idDevice, nfcData, horaMarca, lat, lng, estado));
                 cursor.moveToNext();
             }
         }
@@ -321,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
         initUIComponents();
         initWebviewComponents();
         initDb();
-        initNFCComponents();
+        //initNFCComponents();
     }
 
     @Override

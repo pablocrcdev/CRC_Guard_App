@@ -11,13 +11,14 @@ public class Marca {
     private String lng;
     private String estado;
 
-    public Marca(int pDbId, String pImei, String pNfcData, String pHoraMarca, String pLat, String pLng){
+    public Marca(int pDbId, String pImei, String pNfcData, String pHoraMarca, String pLat, String pLng, String pEstado){
         this.dbId = pDbId;
         this.imei = pImei;
         this.nfcData = pNfcData;
         this.horaMarca = pHoraMarca;
         this.lat = pLat;
         this.lng = pLng;
+        this.estado = pEstado;
     }
 
     public Marca(String pImei, String pNfcData, String pHoraMarca, String pLat, String pLng){
