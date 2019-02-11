@@ -19,6 +19,7 @@ public class Marca {
         this.lat = pLat;
         this.lng = pLng;
     }
+
     public Marca(String pImei, String pNfcData, String pHoraMarca, String pLat, String pLng){
         this.imei = pImei;
         this.nfcData = pNfcData;

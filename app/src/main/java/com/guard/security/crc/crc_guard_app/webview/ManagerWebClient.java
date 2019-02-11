@@ -1,6 +1,7 @@
 package com.guard.security.crc.crc_guard_app.webview;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.webkit.WebResourceError;
@@ -8,6 +9,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.guard.security.crc.crc_guard_app.activities.LocalHomeActivity;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
 
 public class ManagerWebClient extends WebViewClient {
@@ -35,6 +37,8 @@ public class ManagerWebClient extends WebViewClient {
                     // Manejo de la excepcion en caso de error
                 }
                 if(timeout) {
+                    Intent intent = new Intent(gvContext, LocalHomeActivity.class);
+                    gvContext.startActivity(intent);
                     // Si es excedido el tiempo de espera se efectua la instruccion
                 }
             }

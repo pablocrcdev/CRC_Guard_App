@@ -1,7 +1,6 @@
 package com.guard.security.crc.crc_guard_app.activities;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
@@ -18,7 +17,6 @@ import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.os.Build;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -26,19 +24,18 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.text.format.DateFormat;
 import android.util.Log;
-import android.webkit.WebView;
-import android.widget.ProgressBar;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.guard.security.crc.crc_guard_app.R;
+import com.guard.security.crc.crc_guard_app.adapters.MarcaAdapter;
 import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
-import com.guard.security.crc.crc_guard_app.webview.ManagerWebClient;
-import com.guard.security.crc.crc_guard_app.webview.WebInterface;
 
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
@@ -46,27 +43,25 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class LocalHomeActivity extends AppCompatActivity {
 
-    private WebView gvWebView;
-    private ProgressBar gvProgressBar;
-    private String mURL = "http://201.196.88.8:9090/crccoding/";
-
+    private DatabaseHandler dbHelper;
     private SQLiteDatabase db;
-    private DatabaseHandler dbhelper;
+
+    private ListView listView;
+    private Button btnCreate;
+    private Button btnDelete;
+
+    private MarcaAdapter adapter;
+    private List<Marca> marcas;
 
     private GPSRastreador gvGPS;
 
     private NfcAdapter gvNfcAdapter;
     private PendingIntent gvPendingIntent;
-    private IntentFilter gvWriteTagFilters[];
-    private boolean gvWriteMode;
     private Tag gvMytag;
 
-    private Context gvContext;
-
     private int gvALL_PERMISSION = 0;
-
     private int REQUEST_READ_PHONE_STATE = 1;
     //********************************************************************************************//
     // Metodos de validacion
@@ -106,28 +101,13 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.READ_PHONE_STATE}, gvALL_PERMISSION);
     }
 
-    public String obtenerIdentificador() {
-        TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-        }
-
-        ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE}, gvALL_PERMISSION);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return telephonyManager.getImei();
-        }else{
-            return "not found";
-        }
-    }
-
     protected void validarAccesos(){
         int permissionCheck = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_PHONE_STATE);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_PHONE_STATE},
-                    REQUEST_READ_PHONE_STATE);
+                    gvALL_PERMISSION);
 
         } else {
             //TODO
@@ -137,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
-            case 1:
+            case 0:
                 if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
 
                 }
@@ -147,50 +127,10 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
+
     //********************************************************************************************//
-    // Metodos de inicializacion
+    // Inicializadores
     //********************************************************************************************//
-    private void initUIComponents() {
-        gvWebView = (WebView) findViewById(R.id.WebView);
-        gvProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        gvContext = this;
-        if (gvNfcAdapter == null) {
-            Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
-            finish();
-        } else if (!gvNfcAdapter.isEnabled()) {
-            Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
-        }
-
-    }
-
-    private void initWebviewComponents() {
-
-        if (validarEstadoRed()) {
-            if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
-                solicitarAccesos();
-            }
-            // Seteo de Cliente Web, para manejo de navegador interno
-            gvWebView.setWebViewClient(new ManagerWebClient(this));
-            // Habilitacion de Javascript en el webview
-            gvWebView.getSettings().setJavaScriptEnabled(true);
-            // Inicializacion de interfaz de javascript entre webview y app android
-            gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS, obtenerIdentificador()), "Android");
-            // Permite el acceso a documentos
-            gvWebView.getSettings().setAllowFileAccess(true);
-            // Carga de URL en el elemento Webview
-            gvWebView.loadUrl(mURL);
-        } else {
-            new ErrorController(this).showNetworkDialog();
-        }
-    }
-
-    private void initDb() {
-        //Abrimos la base de datos 'DBTest1' en modo escritura
-        dbhelper = new DatabaseHandler(this, "RG", null, 2);
-        db = dbhelper.getWritableDatabase();
-    }
-
     private void initNFCComponents(){
         readFromIntent(getIntent());
 
@@ -198,9 +138,37 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
     }
+
     //********************************************************************************************//
     // Metodos para interactuar con la base de datos
     //********************************************************************************************//
+    private List<Marca> obtenerMarcasDispositivo() {
+
+        // Seleccionamos todos los registros de la tabla Cars
+        //Cursor cursor = db.rawQuery("select * from marca_reloj where imei_device="+obtenerIdentificador(), null);
+        Cursor cursor = db.rawQuery("select * from marca_reloj", null);
+        List<Marca> list = new ArrayList<Marca>();
+
+        if (cursor.moveToFirst()) {
+            // iteramos sobre el cursor de resultados,
+            // y vamos rellenando el array que posteriormente devolveremos
+            while (cursor.isAfterLast() == false) {
+
+                int dbId = cursor.getInt(cursor.getColumnIndex("num_marca"));
+                String idDevice = cursor.getString(cursor.getColumnIndex("imei_device"));
+                String nfcData = cursor.getString(cursor.getColumnIndex("nfc_data"));
+                String horaMarca = cursor.getString(cursor.getColumnIndex("hora_marca"));
+                String lat = cursor.getString(cursor.getColumnIndex("latitud"));
+                String lng = cursor.getString(cursor.getColumnIndex("longitud"));
+
+                list.add(new Marca(dbId, idDevice, nfcData, horaMarca, lat, lng));
+
+                cursor.moveToNext();
+            }
+        }
+        return list;
+    }
+
     private void registrarMarca(Marca pMarca) {
         //Si hemos abierto correctamente la base de datos
         if (db != null) {
@@ -218,37 +186,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void obtenerMarcasDispositivo(){
-        // Seleccionamos todos los registros de la tabla Cars
-        Cursor cursor = db.rawQuery("select * from marca_reloj where ind_estado = 'PEN'", null);
-        List<Marca> list = new ArrayList<Marca>();
-        if (cursor.moveToFirst()) {
-            // iteramos sobre el cursor de resultados,
-            // y vamos rellenando el array que posteriormente devolveremos
-            while (cursor.isAfterLast() == false) {
-
-                int dbId = cursor.getInt(cursor.getColumnIndex("num_marca"));
-                String idDevice = cursor.getString(cursor.getColumnIndex("imei_device"));
-                String nfcData = cursor.getString(cursor.getColumnIndex("nfc_data"));
-                String horaMarca = cursor.getString(cursor.getColumnIndex("hora_marca"));
-                String lat = cursor.getString(cursor.getColumnIndex("latitud"));
-                String lng = cursor.getString(cursor.getColumnIndex("longitud"));
-                list.add(new Marca(dbId, idDevice, nfcData, horaMarca, lat, lng));
-                cursor.moveToNext();
-            }
-        }
+    private void actualizarListView() {
+        // borramos todos los elementos
+        marcas.clear();
+        // cargamos todos los elementos
+        marcas.addAll(obtenerMarcasDispositivo());
+        // refrescamos el adaptador
+        adapter.notifyDataSetChanged();
     }
 
-    private void actualizarRegistroPendiente(Marca pMarca){
+    private void create(){
+        //Si hemos abierto correctamente la base de datos
         if (db != null) {
-            ContentValues cv = new ContentValues();
-            cv.put("ind_estado", "ACT"); // registro de estado (ACT)ualizado
+            //Creamos el registro a insertar como objeto ContentValues
+            ContentValues nuevoRegistro = new ContentValues();
+            // El ID es auto incrementable como declaramos en el DatabaseHandler
+            nuevoRegistro.put("imei_device", obtenerIdentificador());
+            nuevoRegistro.put("nfc_data", "Prueba");
+            nuevoRegistro.put("hora_marca", new Date().toString());
+            nuevoRegistro.put("latitud", "latitud");
+            nuevoRegistro.put("longitud", "longitud");
 
-            db.update("marca_reloj", cv, "num_marca="+pMarca.getDbId(), null);
-
+            //Insertamos el registro en la base de datos
+            db.insert("marca_reloj", null, nuevoRegistro);
         }
-
     }
+    //********************************************************************************************//
+    // Metodos para obtener datos del dispositivo
+    //********************************************************************************************//
+    public String obtenerIdentificador() {
+        TelephonyManager telephonyManager = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        }
+        return telephonyManager.getDeviceId();
+    }
+
+
     //********************************************************************************************//
     // Metodos para usar el servicio de NFC
     //********************************************************************************************//
@@ -298,7 +271,10 @@ public class MainActivity extends AppCompatActivity {
                 dateFormat.format(date).toString(),
                 Double.toString(gvGPS.obtenerLatitud()),
                 Double.toString(gvGPS.obtenerLongitud()));
+
         registrarMarca(marca);
+
+        actualizarListView();
 
     }
 
@@ -316,20 +292,44 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_local_home);
+        //Se elimina la versión anterior de la tabla
         validarAccesos();
-        initUIComponents();
-        initWebviewComponents();
-        initDb();
-        initNFCComponents();
-    }
+        if (validarEstadoRed()) {
+            if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
+                solicitarAccesos();
+            }
+            listView = (ListView) findViewById(R.id.listView);
+            marcas = new ArrayList<Marca>();
 
-    @Override
-    protected void onNewIntent(Intent pIntent) {
-        setIntent(pIntent);
-        readFromIntent(pIntent);
-        if(NfcAdapter.ACTION_TAG_DISCOVERED.equals(pIntent.getAction())){
-            gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            btnCreate = (Button) findViewById(R.id.buttonCreate);
+            btnDelete = (Button) findViewById(R.id.buttonDelete);
+
+            btnCreate.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    create();
+                    actualizarListView();
+                }
+            });
+            btnDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //
+                }
+            });
+            //Abrimos la base de datos 'DBTest1' en modo escritura
+            dbHelper = new DatabaseHandler(this, "RG", null, 2);
+            db = dbHelper.getWritableDatabase();
+            //initNFCComponents();
+
+            adapter = new MarcaAdapter(this, marcas, R.layout.items_template);
+            listView.setAdapter(adapter);
+
+            //actualizarListView();
+
+        }else{
+            new ErrorController(this).showNetworkDialog();
         }
     }
 
