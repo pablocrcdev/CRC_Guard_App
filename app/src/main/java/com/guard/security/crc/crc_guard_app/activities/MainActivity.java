@@ -166,23 +166,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void initWebviewComponents() {
 
-        if (validarEstadoRed()) {
-            if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
-                solicitarAccesos();
-            }
-            // Seteo de Cliente Web, para manejo de navegador interno
-            gvWebView.setWebViewClient(new ManagerWebClient(this));
-            // Habilitacion de Javascript en el webview
-            gvWebView.getSettings().setJavaScriptEnabled(true);
-            // Inicializacion de interfaz de javascript entre webview y app android
-            //gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS, obtenerIdentificador()), "Android");
-            // Permite el acceso a documentos
-            gvWebView.getSettings().setAllowFileAccess(true);
-            // Carga de URL en el elemento Webview
-            gvWebView.loadUrl(mURL);
-        } else {
-            new ErrorController(this).showNetworkDialog();
-        }
+
+        // Seteo de Cliente Web, para manejo de navegador interno
+        gvWebView.setWebViewClient(new ManagerWebClient(this));
+        // Habilitacion de Javascript en el webview
+        gvWebView.getSettings().setJavaScriptEnabled(true);
+        // Inicializacion de interfaz de javascript entre webview y app android
+        //gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS, obtenerIdentificador()), "Android");
+        // Permite el acceso a documentos
+        gvWebView.getSettings().setAllowFileAccess(true);
+        // Carga de URL en el elemento Webview
+        gvWebView.loadUrl(mURL);
+
     }
 
     private void initDb() {
@@ -318,11 +313,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        validarAccesos();
-        initUIComponents();
-        initWebviewComponents();
-        initDb();
-        //initNFCComponents();
+        if (validarEstadoRed()) {
+            if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
+                solicitarAccesos();
+            }
+            //validarAccesos();
+            initUIComponents();
+            initWebviewComponents();
+            initDb();
+            //initNFCComponents();
+        } else {
+            new ErrorController(this).showNetworkDialog();
+        }
     }
 
     @Override

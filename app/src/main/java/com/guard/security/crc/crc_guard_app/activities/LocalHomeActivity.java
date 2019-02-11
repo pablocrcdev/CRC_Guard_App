@@ -49,8 +49,6 @@ public class LocalHomeActivity extends AppCompatActivity {
     private SQLiteDatabase db;
 
     private ListView listView;
-    private Button btnCreate;
-    private Button btnDelete;
 
     private MarcaAdapter adapter;
     private List<Marca> marcas;
@@ -301,19 +299,11 @@ public class LocalHomeActivity extends AppCompatActivity {
             listView = (ListView) findViewById(R.id.listView);
             marcas = new ArrayList<Marca>();
 
-            btnCreate = (Button) findViewById(R.id.buttonCreate);
 
-            btnCreate.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    create();
-                    actualizarListView();
-                }
-            });
             //Abrimos la base de datos 'DBTest1' en modo escritura
             dbHelper = new DatabaseHandler(this, "RG", null, 1);
             db = dbHelper.getWritableDatabase();
-            //initNFCComponents();
+            initNFCComponents();
 
             adapter = new MarcaAdapter(this, marcas, R.layout.items_template);
             listView.setAdapter(adapter);
