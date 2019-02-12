@@ -3,6 +3,7 @@ package com.guard.security.crc.crc_guard_app.webview;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.webkit.JavascriptInterface;
@@ -42,11 +43,24 @@ public class WebInterface {
             return "";
         }
     }
-    /*
+
     @JavascriptInterface
     public String getIdDevice() {
-        return idDevice;
-    }*/
+        return obtenerIdentificador();
+    }
+
+    public String obtenerIdentificador() {
+        TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(gvContext, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return telephonyManager.getImei();
+        }else{
+            return telephonyManager.getDeviceId();
+        }
+
+    }
+
 
 
 
