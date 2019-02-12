@@ -72,7 +72,9 @@ public class MainActivity extends AppCompatActivity {
 
     private int gvALL_PERMISSION = 0;
 
-    private int REQUEST_READ_PHONE_STATE = 1;
+
+    private int gvPERMISSION_ALL = 1;
+    private String[] gvPERMISSIONS = {Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE};
     //********************************************************************************************//
     // Metodos de inicializacion
     //********************************************************************************************//
@@ -172,6 +174,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Permisos para utilizar camara de dispositivc
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+
+        }
+        return true;
+    }
     //********************************************************************************************//
     // Metodos para interactuar con la base de datos
     //********************************************************************************************//
@@ -235,6 +249,9 @@ public class MainActivity extends AppCompatActivity {
         if (validarEstadoRed()) {
             if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
                 solicitarAccesos();
+            }
+            if(!hasPermissions(MainActivity.this, gvPERMISSIONS)){
+                ActivityCompat.requestPermissions(MainActivity.this, gvPERMISSIONS, gvPERMISSION_ALL);
             }
             /*initUIComponents();
             initWebviewComponents();
