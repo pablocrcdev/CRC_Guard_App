@@ -15,9 +15,12 @@ import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.nfc.FormatException;
 import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
+import android.nfc.tech.Ndef;
 import android.os.Build;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -41,6 +44,7 @@ import com.guard.security.crc.crc_guard_app.webview.ManagerChromeClient;
 import com.guard.security.crc.crc_guard_app.webview.ManagerWebClient;
 import com.guard.security.crc.crc_guard_app.webview.WebInterface;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
     //private String mURL = "http://201.196.88.8:9091/crccoding/f?p=2560";
-    private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560";
+    private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560:1";
 
     private SQLiteDatabase db;
     private DatabaseHandler dbhelper;
@@ -64,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
     private IntentFilter gvWriteTagFilters[];
     private boolean gvWriteMode;
     private Tag gvMytag;
-
     private Context gvContext;
 
     private int gvALL_PERMISSION = 0;
@@ -233,23 +236,51 @@ public class MainActivity extends AppCompatActivity {
             if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
                 solicitarAccesos();
             }
-            initUIComponents();
+            /*initUIComponents();
             initWebviewComponents();
             initDb();
-            initNFCComponents();
+            initNFCComponents();*/
+            gvContext = this;
+            // Declaracion del elemento xml en la clase para configuraciones
+            gvWebView = (WebView) findViewById(R.id.WebView);
+            // Inicializacion de elemento Progress Bar
+            gvProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+            gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+            if (gvNfcAdapter == null) {
+                Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
+                finish();
+            } else if (!gvNfcAdapter.isEnabled()) {
+                Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
+            }
+            // Seteo de Cliente Web, para manejo de navegador interno
+            gvWebView.setWebViewClient(new ManagerWebClient(this));
+            // Habilitacion de Javascript en el webview
+            gvWebView.getSettings().setJavaScriptEnabled(true);
+            // Inicializacion de interfaz de javascript entre webview y app android
+            gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS),"Android");
+            // Permite el acceso a documentos
+            gvWebView.getSettings().setAllowFileAccess(true);
+            // Carga de URL en el elemento Webview
+            gvWebView.loadUrl(mURL);
+
+            gvWebView.setWebChromeClient(new ManagerChromeClient(this));
+            //Abrimos la base de datos 'DBTest1' en modo escritura
+            dbhelper = new DatabaseHandler(this, "RG", null, 1);
+            db = dbhelper.getWritableDatabase();
+
+            readFromIntent(getIntent());
+
+            gvPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+            IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+            tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
+            gvWriteTagFilters = new IntentFilter[] { tagDetected };
         } else {
             new ErrorController(this).showNetworkDialog();
         }
     }
 
-    @Override
-    protected void onNewIntent(Intent pIntent) {
-        setIntent(pIntent);
-        readFromIntent(pIntent);
-        if(NfcAdapter.ACTION_TAG_DISCOVERED.equals(pIntent.getAction())){
-            gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-        }
-    }
 
     @Override
     protected void onDestroy() {
@@ -308,13 +339,17 @@ public class MainActivity extends AppCompatActivity {
                 Double.toString(gvGPS.obtenerLongitud()));
         registrarMarca(marca);
 
-        //String v = gvWebView.getUrl();
+        //String v = gvWebView.getOriginalUrl();
+
         gvWebView.loadUrl("javascript:receiveData('" + marca.getImei() + "'" +
                 ",'" + marca.getNfcData() + "'" +
                 ",'" + marca.getHoraMarca() + "'" +
                 ",'" + marca.getLat() + "'" +
                 ",'" + marca.getLng() + "'" +
                 ",'" + "NFC" + "');");
+        //v.replace("XXXXXXXXXX",text);
+        //gvWebView.loadUrl(v);
+        //Toast.makeText(this, v, Toast.LENGTH_SHORT ).show();
         //gvWebView.reload();
 
         //gvWebView.loadUrl("javascript:" + "readNFCTag(" + text + ");");
@@ -331,4 +366,76 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /******************************************************************************
+     **********************************Write to NFC Tag****************************
+     ******************************************************************************/
+    private void write(String pText, Tag pTag) throws IOException, FormatException {
+        NdefRecord[] records = { createRecord(pText) };
+        NdefMessage message = new NdefMessage(records);
+        // Get an instance of Ndef for the tag.
+        Ndef ndef = Ndef.get(pTag);
+        // Enable I/O
+        ndef.connect();
+        // Write the message
+        ndef.writeNdefMessage(message);
+        // Close the connection
+        ndef.close();
+    }
+
+    private NdefRecord createRecord(String pText) throws UnsupportedEncodingException {
+        String lang       = "en";
+        byte[] textBytes  = pText.getBytes();
+        byte[] langBytes  = lang.getBytes("US-ASCII");
+        int    langLength = langBytes.length;
+        int    textLength = textBytes.length;
+        byte[] payload    = new byte[1 + langLength + textLength];
+
+        // set status byte (see NDEF spec for actual bits)
+        payload[0] = (byte) langLength;
+
+
+        // copy langbytes and textbytes into payload
+        System.arraycopy(langBytes, 0, payload, 1,              langLength);
+        System.arraycopy(textBytes, 0, payload, 1 + langLength, textLength);
+
+        NdefRecord recordNFC = new NdefRecord(NdefRecord.TNF_WELL_KNOWN,  NdefRecord.RTD_TEXT,  new byte[0], payload);
+
+        return recordNFC;
+    }
+
+    @Override
+    protected void onNewIntent(Intent pIntent) {
+        setIntent(pIntent);
+        readFromIntent(pIntent);
+        if(NfcAdapter.ACTION_TAG_DISCOVERED.equals(pIntent.getAction())){
+            gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        }
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        gvNfcAdapter.disableForegroundDispatch(this);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
+    }
+
+    /******************************************************************************
+     **********************************Enable Write********************************
+     ******************************************************************************/
+    private void WriteModeOn(){
+        gvWriteMode = true;
+    }
+    /******************************************************************************
+     **********************************Disable Write*******************************
+     ******************************************************************************/
+    private void WriteModeOff(){
+        gvWriteMode = false;
+
+    }
 }
