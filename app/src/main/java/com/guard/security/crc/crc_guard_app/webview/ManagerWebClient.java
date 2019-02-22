@@ -3,6 +3,7 @@ package com.guard.security.crc.crc_guard_app.webview;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.nfc.NfcAdapter;
 import android.view.View;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -16,12 +17,14 @@ public class ManagerWebClient extends WebViewClient {
     //=============================VARIABLES GLOBALES=============================================//
     boolean timeout;
     private Context gvContext;
+    private NfcAdapter gvNfcAdapter;
     //============================================================================================//
     // El contructor se define con el parametro de contexto para refenrenciar siempre al activity
     // que este en primer plano y poder aplicar funciones sobre el mismo
     public ManagerWebClient(Context pcontext) {
         this.gvContext = pcontext;
         timeout = true;
+        gvNfcAdapter = NfcAdapter.getDefaultAdapter(gvContext);
     }
 
     @Override
@@ -37,8 +40,12 @@ public class ManagerWebClient extends WebViewClient {
                     // Manejo de la excepcion en caso de error
                 }
                 if(timeout) {
-                    Intent intent = new Intent(gvContext, LocalHomeActivity.class);
-                    gvContext.startActivity(intent);
+                    if (gvNfcAdapter != null) {
+                        Intent intent = new Intent(gvContext, LocalHomeActivity.class);
+                        gvContext.startActivity(intent);
+                    }else{
+                        new ErrorController(gvContext).showErrorDialog();
+                    }
                     // Si es excedido el tiempo de espera se efectua la instruccion
                 }
             }
@@ -54,10 +61,13 @@ public class ManagerWebClient extends WebViewClient {
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         //
+        if (gvNfcAdapter != null) {
+            Intent intent = new Intent(gvContext, LocalHomeActivity.class);
+            gvContext.startActivity(intent);
+        }else{
+            view.setVisibility(View.INVISIBLE);
+            new ErrorController(gvContext).showErrorDialog();
+        }
 
-        Intent intent = new Intent(gvContext, LocalHomeActivity.class);
-        gvContext.startActivity(intent);
-        //view.setVisibility(View.INVISIBLE);
-        //new ErrorController(gvContext).showErrorDialog();
     }
 }
