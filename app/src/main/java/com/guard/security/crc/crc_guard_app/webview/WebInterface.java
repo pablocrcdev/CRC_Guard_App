@@ -97,7 +97,7 @@ public class WebInterface {
             try {
                 obj.put("imei", marcas.getImei());
                 obj.put("nfc", marcas.getNfcData());
-                obj.put("hora", marcas.getHoraMarca());
+                obj.put("hora", marcas.getHoraMarca().toString());
                 obj.put("lat", marcas.getLat());
                 obj.put("lng", marcas.getLng());
 
