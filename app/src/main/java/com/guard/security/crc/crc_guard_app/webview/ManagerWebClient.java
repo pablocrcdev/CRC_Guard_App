@@ -26,7 +26,6 @@ public class ManagerWebClient extends WebViewClient {
         timeout = true;
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(gvContext);
     }
-
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         // Se define el hilo para manejar el tiempo de espera de respuesta

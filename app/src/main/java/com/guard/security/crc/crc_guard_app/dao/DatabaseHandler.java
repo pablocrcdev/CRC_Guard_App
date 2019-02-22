@@ -19,6 +19,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 "longitud text," +
                 "ind_estado text default \"PEN\")");
     }
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int prevVersion, int newVersion) {
         //Se elimina la versión anterior de la tabla

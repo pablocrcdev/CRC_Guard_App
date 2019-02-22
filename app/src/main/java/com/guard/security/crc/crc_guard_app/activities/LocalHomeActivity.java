@@ -49,7 +49,7 @@ public class LocalHomeActivity extends AppCompatActivity {
     private SQLiteDatabase db;
 
     private ListView listView;
-
+    private Button btnCreate;
     private MarcaAdapter adapter;
     private List<Marca> marcas;
 
@@ -58,6 +58,7 @@ public class LocalHomeActivity extends AppCompatActivity {
     private NfcAdapter gvNfcAdapter;
     private PendingIntent gvPendingIntent;
     private Tag gvMytag;
+    private IntentFilter gvWriteTagFilters[];
 
     private int gvALL_PERMISSION = 0;
     private int REQUEST_READ_PHONE_STATE = 1;
@@ -130,11 +131,20 @@ public class LocalHomeActivity extends AppCompatActivity {
     // Inicializadores
     //********************************************************************************************//
     private void initNFCComponents(){
-        readFromIntent(getIntent());
 
-        gvPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
-        tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
+
+        gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        if (gvNfcAdapter != null) {
+
+            readFromIntent(getIntent());
+
+            gvPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+            IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+            tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
+
+            gvWriteTagFilters = new IntentFilter[]{tagDetected};
+        }
     }
 
     //********************************************************************************************//
@@ -285,6 +295,31 @@ public class LocalHomeActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onNewIntent(Intent pIntent) {
+        setIntent(pIntent);
+        if (gvNfcAdapter != null) {
+            readFromIntent(pIntent);
+            if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(pIntent.getAction())) {
+                gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            }
+        }
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        if (gvNfcAdapter != null)
+            gvNfcAdapter.disableForegroundDispatch(this);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if (gvNfcAdapter != null)
+            gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -292,28 +327,35 @@ public class LocalHomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_local_home);
         //Se elimina la versión anterior de la tabla
         //validarAccesos();
-        if (validarEstadoRed()) {
-            if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
-                solicitarAccesos();
-            }
-            listView = (ListView) findViewById(R.id.listView);
-            marcas = new ArrayList<Marca>();
-
-
-            //Abrimos la base de datos 'DBTest1' en modo escritura
-            dbHelper = new DatabaseHandler(this, "RG", null, 1);
-            db = dbHelper.getWritableDatabase();
-            initNFCComponents();
-
-            adapter = new MarcaAdapter(this, marcas, R.layout.items_template);
-            listView.setAdapter(adapter);
-
-            actualizarListView();
-
-        }else{
-            new ErrorController(this).showNetworkDialog();
+        if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
+            solicitarAccesos();
         }
+        Log.i("LOCALHOME","Inicio Local Home Activity");
+        listView = findViewById(R.id.listView);
+        btnCreate = findViewById(R.id.buttonCreate);
+
+        // se debe quitar este listener, solo sirve de pruebas
+        btnCreate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                create();
+                actualizarListView();
+            }
+        });
+        marcas = new ArrayList<Marca>();
+
+        //Abrimos la base de datos 'DBTest1' en modo escritura
+        dbHelper = new DatabaseHandler(this, "RG", null, 1);
+        db = dbHelper.getWritableDatabase();
+        initNFCComponents();
+
+        adapter = new MarcaAdapter(this, marcas, R.layout.items_template);
+        listView.setAdapter(adapter);
+
+        actualizarListView();
+
     }
+
 
     @Override
     protected void onDestroy() {

@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
     //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
-
     //private String mURL = "http://201.196.88.8:9091/crccoding/f?p=2560";
     private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560:1";
 
@@ -92,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
     //********************************************************************************************//
     // Metodos de inicializacion
     //********************************************************************************************//
+
     private void initUIComponents() {
         gvWebView = (WebView) findViewById(R.id.WebView);
         gvProgressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Permisos para utilizar camara de dispositivc
+    // Permisos para utilizar camara de dispositivc y album de imagenes
     public static boolean hasPermissions(Context context, String... permissions) {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
             for (String permission : permissions) {
@@ -195,6 +195,8 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
+
     //********************************************************************************************//
     // Metodos para interactuar con la base de datos
     //********************************************************************************************//
@@ -250,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     */
-
+    // se reescribe el metodo para quitarle la funcionalidad del back button en el webview
     @Override
     public void onBackPressed() {
 
@@ -259,6 +261,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (validarEstadoRed()) {
             if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
@@ -273,10 +276,9 @@ public class MainActivity extends AppCompatActivity {
             initNFCComponents();*/
             gvContext = this;
             // Declaracion del elemento xml en la clase para configuraciones
-            gvWebView = (WebView) findViewById(R.id.WebView);
+            gvWebView = findViewById(R.id.WebView);
             // Inicializacion de elemento Progress Bar
-            gvProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-
+            gvProgressBar = findViewById(R.id.progressBar);
 
             if (gvNfcAdapter == null) {
                 Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
@@ -425,6 +427,7 @@ public class MainActivity extends AppCompatActivity {
                 tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
                 gvWriteTagFilters = new IntentFilter[]{tagDetected};
             }
+
         } else {
             if (gvNfcAdapter == null)
                 new ErrorController(this).showNetworkDialog();
@@ -435,11 +438,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
     protected void onDestroy() {
         // cerramos conexión base de datos antes de destruir el activity
-        db.close();
+        if (db != null)
+            db.close();
         super.onDestroy();
     }
 
@@ -520,43 +523,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /******************************************************************************
-     **********************************Write to NFC Tag****************************
-     ******************************************************************************/
-    private void write(String pText, Tag pTag) throws IOException, FormatException {
-        NdefRecord[] records = { createRecord(pText) };
-        NdefMessage message = new NdefMessage(records);
-        // Get an instance of Ndef for the tag.
-        Ndef ndef = Ndef.get(pTag);
-        // Enable I/O
-        ndef.connect();
-        // Write the message
-        ndef.writeNdefMessage(message);
-        // Close the connection
-        ndef.close();
-    }
-
-    private NdefRecord createRecord(String pText) throws UnsupportedEncodingException {
-        String lang       = "en";
-        byte[] textBytes  = pText.getBytes();
-        byte[] langBytes  = lang.getBytes("US-ASCII");
-        int    langLength = langBytes.length;
-        int    textLength = textBytes.length;
-        byte[] payload    = new byte[1 + langLength + textLength];
-
-        // set status byte (see NDEF spec for actual bits)
-        payload[0] = (byte) langLength;
-
-
-        // copy langbytes and textbytes into payload
-        System.arraycopy(langBytes, 0, payload, 1,              langLength);
-        System.arraycopy(textBytes, 0, payload, 1 + langLength, textLength);
-
-        NdefRecord recordNFC = new NdefRecord(NdefRecord.TNF_WELL_KNOWN,  NdefRecord.RTD_TEXT,  new byte[0], payload);
-
-        return recordNFC;
-    }
-
     @Override
     protected void onNewIntent(Intent pIntent) {
         setIntent(pIntent);
@@ -634,17 +600,5 @@ public class MainActivity extends AppCompatActivity {
             gvFilePathCallback = null;
         } // end of code for Lollipop only
     }
-    /******************************************************************************
-     **********************************Enable Write********************************
-     ******************************************************************************/
-    /* private void WriteModeOn(){
-        gvWriteMode = true;
-    }*/
-    /******************************************************************************
-     **********************************Disable Write*******************************
-     ******************************************************************************/
-    /*private void WriteModeOff(){
-        gvWriteMode = false;
 
-    }*/
 }

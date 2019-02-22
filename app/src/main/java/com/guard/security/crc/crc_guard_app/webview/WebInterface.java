@@ -10,11 +10,15 @@ import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.webkit.JavascriptInterface;
 
-import com.google.gson.Gson;
+//import com.google.gson.Gson;
 import com.guard.security.crc.crc_guard_app.activities.MainActivity;
 import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,12 +83,37 @@ public class WebInterface {
     }
 
     private String getJSON(ArrayList<Marca> list) {
-        Gson gson = new Gson();
+        /*Gson gson = new Gson();
         StringBuilder sb = new StringBuilder();
         for(Marca d : list) {
             sb.append(gson.toJson(d));
         }
-        return sb.toString();
+        return sb.toString();*/
+        JSONObject listJSON = new JSONObject();
+        JSONObject obj = null;
+        JSONArray jsonArray = new JSONArray();
+        for (Marca marcas : list) {
+            obj = new JSONObject();
+            try {
+                obj.put("imei", marcas.getImei());
+                obj.put("nfc", marcas.getNfcData());
+                obj.put("hora", marcas.getHoraMarca());
+                obj.put("lat", marcas.getLat());
+                obj.put("lng", marcas.getLng());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            jsonArray.put(obj);
+        }
+        try {
+            listJSON.put("marcas",jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return listJSON.toString();
+
+
     }
 
     private String obtenerIdentificador() {
