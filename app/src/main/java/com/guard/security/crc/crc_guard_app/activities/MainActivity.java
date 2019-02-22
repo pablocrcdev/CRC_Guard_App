@@ -142,24 +142,19 @@ public class MainActivity extends AppCompatActivity {
         ConnectivityManager vConnectivityManager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo vNetworkInfo = vConnectivityManager.getActiveNetworkInfo();
-        if (vNetworkInfo != null && vNetworkInfo.isConnectedOrConnecting())
-            return true;  // Si encuentra que hay conexion
-        else
-            return false; // De no encontrar conexion arroja falso
+        // Si encuentra que hay conexion
+// De no encontrar conexion arroja falso
+        return vNetworkInfo != null && vNetworkInfo.isConnectedOrConnecting();
     }
 
     protected boolean accesarLocalizacion() {
         int vResult = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        if (vResult == PackageManager.PERMISSION_GRANTED)
-            return true;
-        return false;
+        return vResult == PackageManager.PERMISSION_GRANTED;
     }
 
     protected boolean accesarInfoDispositivo() {
         int vResult = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
-        if (vResult == PackageManager.PERMISSION_GRANTED)
-            return true;
-        return false;
+        return vResult == PackageManager.PERMISSION_GRANTED;
     }
 
     protected void solicitarAccesos() {
@@ -264,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (validarEstadoRed()) {
             if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
                 solicitarAccesos();
@@ -282,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
             // Inicializacion de elemento Progress Bar
             gvProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
-            gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
             if (gvNfcAdapter == null) {
                 Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();

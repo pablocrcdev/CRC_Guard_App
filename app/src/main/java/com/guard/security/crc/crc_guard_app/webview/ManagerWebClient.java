@@ -45,7 +45,7 @@ public class ManagerWebClient extends WebViewClient {
                         gvContext.startActivity(intent);
                     }else{
                         new ErrorController(gvContext).showErrorDialog();
-                    }
+                   }
                     // Si es excedido el tiempo de espera se efectua la instruccion
                 }
             }
