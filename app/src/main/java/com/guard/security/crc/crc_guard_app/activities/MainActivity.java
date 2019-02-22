@@ -61,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
+    //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+
     //private String mURL = "http://201.196.88.8:9091/crccoding/f?p=2560";
     private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560:1";
 
@@ -256,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        gvWebView.goBack();
+
     }
 
     @Override
@@ -421,15 +423,21 @@ public class MainActivity extends AppCompatActivity {
             //Abrimos la base de datos 'DBTest1' en modo escritura
             dbhelper = new DatabaseHandler(this, "RG", null, 1);
             db = dbhelper.getWritableDatabase();
+            if (gvNfcAdapter != null) {
+                readFromIntent(getIntent());
 
-            readFromIntent(getIntent());
-
-            gvPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-            IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
-            tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
-            gvWriteTagFilters = new IntentFilter[] { tagDetected };
+                gvPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+                IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+                tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
+                gvWriteTagFilters = new IntentFilter[]{tagDetected};
+            }
         } else {
-            new ErrorController(this).showNetworkDialog();
+            if (gvNfcAdapter == null)
+                new ErrorController(this).showNetworkDialog();
+            else {
+                Intent intent = new Intent(this, LocalHomeActivity.class);
+                startActivity(intent);
+            }
         }
     }
 
@@ -558,23 +566,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent pIntent) {
         setIntent(pIntent);
-        readFromIntent(pIntent);
-        if(NfcAdapter.ACTION_TAG_DISCOVERED.equals(pIntent.getAction())){
-            gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        if (gvNfcAdapter != null) {
+            readFromIntent(pIntent);
+            if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(pIntent.getAction())) {
+                gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            }
         }
     }
 
     @Override
     public void onPause(){
         super.onPause();
-        gvNfcAdapter.disableForegroundDispatch(this);
+        if (gvNfcAdapter != null)
+            gvNfcAdapter.disableForegroundDispatch(this);
     }
 
     @Override
     public void onResume(){
         super.onResume();
-
-        gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
+        if (gvNfcAdapter != null)
+            gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
     }
 
     @Override
@@ -632,14 +643,14 @@ public class MainActivity extends AppCompatActivity {
     /******************************************************************************
      **********************************Enable Write********************************
      ******************************************************************************/
-    private void WriteModeOn(){
+    /* private void WriteModeOn(){
         gvWriteMode = true;
-    }
+    }*/
     /******************************************************************************
      **********************************Disable Write*******************************
      ******************************************************************************/
-    private void WriteModeOff(){
+    /*private void WriteModeOff(){
         gvWriteMode = false;
 
-    }
+    }*/
 }
