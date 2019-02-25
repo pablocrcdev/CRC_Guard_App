@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo vNetworkInfo = vConnectivityManager.getActiveNetworkInfo();
         // Si encuentra que hay conexion
-// De no encontrar conexion arroja falso
+        // De no encontrar conexion arroja falso
         return vNetworkInfo != null && vNetworkInfo.isConnectedOrConnecting();
     }
 
@@ -218,40 +218,7 @@ public class MainActivity extends AppCompatActivity {
             db.insert("marca_reloj", null, nuevoRegistro);
         }
     }
-    /*
-    private void obtenerMarcasDispositivo(){
-        // Seleccionamos todos los registros de la tabla Cars
-        Cursor cursor = db.rawQuery("select * from marca_reloj where ind_estado = 'PEN'", null);
-        List<Marca> list = new ArrayList<Marca>();
-        if (cursor.moveToFirst()) {
-            // iteramos sobre el cursor de resultados,
-            // y vamos rellenando el array que posteriormente devolveremos
-            while (cursor.isAfterLast() == false) {
 
-                int dbId = cursor.getInt(cursor.getColumnIndex("num_marca"));
-                String idDevice = cursor.getString(cursor.getColumnIndex("imei_device"));
-                String nfcData = cursor.getString(cursor.getColumnIndex("nfc_data"));
-                String horaMarca = cursor.getString(cursor.getColumnIndex("hora_marca"));
-                String lat = cursor.getString(cursor.getColumnIndex("latitud"));
-                String lng = cursor.getString(cursor.getColumnIndex("longitud"));
-                String estado = cursor.getString(cursor.getColumnIndex("ind_estado"));
-                list.add(new Marca(dbId, idDevice, nfcData, horaMarca, lat, lng, estado));
-                cursor.moveToNext();
-            }
-        }
-    }
-
-    private void actualizarRegistroPendiente(Marca pMarca){
-        if (db != null) {
-            ContentValues cv = new ContentValues();
-            cv.put("ind_estado", "ACT"); // registro de estado (ACT)ualizado
-
-            db.update("marca_reloj", cv, "num_marca="+pMarca.getDbId(), null);
-
-        }
-
-    }
-    */
     // se reescribe el metodo para quitarle la funcionalidad del back button en el webview
     @Override
     public void onBackPressed() {

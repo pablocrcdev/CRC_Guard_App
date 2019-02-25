@@ -10,6 +10,7 @@ import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.webkit.JavascriptInterface;
+import android.widget.Toast;
 
 //import com.google.gson.Gson;
 import com.guard.security.crc.crc_guard_app.activities.MainActivity;
@@ -27,7 +28,6 @@ import java.util.List;
 public class WebInterface {
     private Context gvContext;
     private GPSRastreador gvGPS;
-    //private String idDevice;
     private SQLiteDatabase db;
     private DatabaseHandler dbhelper;
 
@@ -35,9 +35,6 @@ public class WebInterface {
     public WebInterface(Context pContext, GPSRastreador pGps){//, String pIdDevice) {
         this.gvContext = pContext;
         this.gvGPS = pGps;
-
-        dbhelper = new DatabaseHandler(pContext, "RG", null, 1);
-        db = dbhelper.getWritableDatabase();
     }
 
     @JavascriptInterface
@@ -69,17 +66,25 @@ public class WebInterface {
 
     @JavascriptInterface
     public boolean validarPendientes(){
-        Cursor cursor = db.rawQuery("select count(*) from marca_reloj where ind_estado = 'PEN'", null);
-        cursor.moveToFirst();
-        int count= cursor.getInt(0);
-        cursor.close();
-        if(count > 0)
-            return true;
+        dbhelper = new DatabaseHandler(gvContext, "RG", null, 1);
+        db = dbhelper.getWritableDatabase();
+        if (db != null) {
+            Cursor cursor = db.rawQuery("select count(*) from marca_reloj where ind_estado = 'PEN'", null);
+            cursor.moveToFirst();
+            int count = cursor.getInt(0);
+            cursor.close();
+            if (count != 0)
+                return true;
+            return false;
+        }
+        Toast.makeText(gvContext, "La base de datos no existe! Informe al Administrador de la aplicación", Toast.LENGTH_LONG ).show();
         return false;
     }
 
     @JavascriptInterface
     public void actualizaRegistros(){
+
+        Toast.makeText(gvContext, "Actualizando registros", Toast.LENGTH_LONG ).show();
         actualizarRegistroPendiente();
     }
 
@@ -157,6 +162,9 @@ public class WebInterface {
     }
 
     private void actualizarRegistroPendiente(){
+        dbhelper = new DatabaseHandler(gvContext, "RG", null, 1);
+        db = dbhelper.getWritableDatabase();
+
         if (db != null) {
             ContentValues cv = new ContentValues();
             cv.put("ind_estado", "PRC"); // registro de estado (ACT)ualizado

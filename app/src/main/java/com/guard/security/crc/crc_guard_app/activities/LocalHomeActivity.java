@@ -49,7 +49,7 @@ public class LocalHomeActivity extends AppCompatActivity {
     private SQLiteDatabase db;
 
     private ListView listView;
-    private Button btnCreate;
+    //private Button btnCreate;
     private MarcaAdapter adapter;
     private List<Marca> marcas;
 
@@ -320,7 +320,6 @@ public class LocalHomeActivity extends AppCompatActivity {
             gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -332,7 +331,7 @@ public class LocalHomeActivity extends AppCompatActivity {
         }
         Log.i("LOCALHOME","Inicio Local Home Activity");
         listView = findViewById(R.id.listView);
-        btnCreate = findViewById(R.id.buttonCreate);
+        /*btnCreate = findViewById(R.id.buttonCreate);
 
         // se debe quitar este listener, solo sirve de pruebas
         btnCreate.setOnClickListener(new View.OnClickListener() {
@@ -341,7 +340,7 @@ public class LocalHomeActivity extends AppCompatActivity {
                 create();
                 actualizarListView();
             }
-        });
+        });*/
         marcas = new ArrayList<Marca>();
 
         //Abrimos la base de datos 'DBTest1' en modo escritura
@@ -355,7 +354,6 @@ public class LocalHomeActivity extends AppCompatActivity {
         actualizarListView();
 
     }
-
 
     @Override
     protected void onDestroy() {
