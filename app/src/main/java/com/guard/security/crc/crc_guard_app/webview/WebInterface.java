@@ -1,6 +1,7 @@
 package com.guard.security.crc.crc_guard_app.webview;
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -78,6 +79,11 @@ public class WebInterface {
     }
 
     @JavascriptInterface
+    public void actualizaRegistros(){
+        actualizarRegistroPendiente();
+    }
+
+    @JavascriptInterface
     public String getMarks(){
         return getJSON((ArrayList<Marca>) obtenerMarcas());
     }
@@ -150,4 +156,13 @@ public class WebInterface {
         return list;
     }
 
+    private void actualizarRegistroPendiente(){
+        if (db != null) {
+            ContentValues cv = new ContentValues();
+            cv.put("ind_estado", "PRC"); // registro de estado (ACT)ualizado
+
+            db.update("marca_reloj", cv, "ind_estado="+ "\"PEN\"", null);
+        }
+
+    }
 }
