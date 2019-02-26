@@ -61,9 +61,9 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
-    //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+    private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
     //private String mURL = "http://201.196.88.8:9091/crccoding/f?p=2560";
-    private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560:1";
+    //private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560:1";
 
     private SQLiteDatabase db;
     private DatabaseHandler dbhelper;
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return telephonyManager.getImei();
         }else{
-            return "not found";
+            return telephonyManager.getDeviceId();
         }
     }
 
@@ -455,29 +455,19 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         gvGPS = new GPSRastreador(this);
-        //tvNFCContent.setText("NFC Content: " + text);
         Marca marca = new Marca(obtenerIdentificador(),
                 text,
                 dateFormat.format(date).toString(),
                 Double.toString(gvGPS.obtenerLatitud()),
                 Double.toString(gvGPS.obtenerLongitud()));
         registrarMarca(marca);
-
-        //String v = gvWebView.getOriginalUrl();
-
         gvWebView.loadUrl("javascript:receiveData('" + marca.getImei() + "'" +
                 ",'" + marca.getNfcData() + "'" +
                 ",'" + marca.getHoraMarca() + "'" +
                 ",'" + marca.getLat() + "'" +
                 ",'" + marca.getLng() + "'" +
                 ",'" + "NFC" + "');");
-        //v.replace("XXXXXXXXXX",text);
-        //gvWebView.loadUrl(v);
-        //Toast.makeText(this, v, Toast.LENGTH_SHORT ).show();
-        //gvWebView.reload();
 
-        //gvWebView.loadUrl("javascript:" + "readNFCTag(" + text + ");");
-        //gvWebView.loadUrl("javascript:(function(){ alert ('"+text+"')})();");
     }
 
     public void sonarAlarma(){
@@ -511,8 +501,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        if (gvNfcAdapter != null)
+        gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (gvNfcAdapter != null) {
+            gvPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+            IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+            tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
+            gvWriteTagFilters = new IntentFilter[]{tagDetected};
             gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
+        }
     }
 
     @Override

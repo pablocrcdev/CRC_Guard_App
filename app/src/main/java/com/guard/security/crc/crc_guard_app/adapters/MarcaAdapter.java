@@ -44,11 +44,11 @@ public class MarcaAdapter extends BaseAdapter {
             convertView = LayoutInflater.from(context).inflate(layout, null);
             vh = new ViewHolder();
             vh.numMarca = (TextView) convertView.findViewById(R.id.textViewNumMarca);
-            vh.idDevice = (TextView) convertView.findViewById(R.id.textViewIdDevice);
-            vh.nfcData = (TextView) convertView.findViewById(R.id.textViewNfcData);
+            //vh.idDevice = (TextView) convertView.findViewById(R.id.textViewIdDevice);
+            //vh.nfcData = (TextView) convertView.findViewById(R.id.textViewNfcData);
             vh.horaMarca = (TextView) convertView.findViewById(R.id.textViewHoraMarca);
-            vh.latitud = (TextView) convertView.findViewById(R.id.textViewLatitud);
-            vh.longitud = (TextView) convertView.findViewById(R.id.textViewLongitud);
+            //vh.latitud = (TextView) convertView.findViewById(R.id.textViewLatitud);
+            //vh.longitud = (TextView) convertView.findViewById(R.id.textViewLongitud);
             vh.estado = (TextView) convertView.findViewById(R.id.textViewIndEstado);
             convertView.setTag(vh);
         } else {
@@ -58,11 +58,11 @@ public class MarcaAdapter extends BaseAdapter {
         Marca currentMarca = list.get(position);
 
         vh.numMarca.setText(currentMarca.getDbId()+"");
-        vh.idDevice.setText(currentMarca.getImei());
-        vh.nfcData.setText(currentMarca.getNfcData());
+        //vh.idDevice.setText(currentMarca.getImei());
+        //vh.nfcData.setText(currentMarca.getNfcData());
         vh.horaMarca.setText(currentMarca.getHoraMarca());
-        vh.latitud.setText(currentMarca.getLat());
-        vh.longitud.setText(currentMarca.getLng());
+        //vh.latitud.setText(currentMarca.getLat());
+        //vh.longitud.setText(currentMarca.getLng());
         vh.estado.setText(currentMarca.getEstado());
 
         return convertView;
@@ -70,11 +70,11 @@ public class MarcaAdapter extends BaseAdapter {
 
     public class ViewHolder {
         TextView numMarca;
-        TextView idDevice;
-        TextView nfcData;
+        //TextView idDevice;
+        //TextView nfcData;
         TextView horaMarca;
-        TextView latitud;
-        TextView longitud;
+        //TextView latitud;
+        //TextView longitud;
         TextView estado;
     }
 }

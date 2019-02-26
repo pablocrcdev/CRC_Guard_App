@@ -8,6 +8,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public DatabaseHandler (Context pContext, String pName, SQLiteDatabase.CursorFactory pFactory, int pVersion){
         super(pContext, pName, pFactory, pVersion);
     }
+
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("create table marca_reloj (" +

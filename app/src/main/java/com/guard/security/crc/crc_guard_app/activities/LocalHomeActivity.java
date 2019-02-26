@@ -65,15 +65,6 @@ public class LocalHomeActivity extends AppCompatActivity {
     //********************************************************************************************//
     // Metodos de validacion
     //********************************************************************************************//
-    protected boolean validarEstadoRed() {
-        ConnectivityManager vConnectivityManager = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo vNetworkInfo = vConnectivityManager.getActiveNetworkInfo();
-        if (vNetworkInfo != null && vNetworkInfo.isConnectedOrConnecting())
-            return true;  // Si encuentra que hay conexion
-        else
-            return false; // De no encontrar conexion arroja falso
-    }
 
     protected boolean accesarLocalizacion() {
         int vResult = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -110,20 +101,6 @@ public class LocalHomeActivity extends AppCompatActivity {
 
         } else {
             //TODO
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 0:
-                if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-
-                }
-                break;
-
-            default:
-                break;
         }
     }
 
@@ -228,7 +205,6 @@ public class LocalHomeActivity extends AppCompatActivity {
         return telephonyManager.getDeviceId();
     }
 
-
     //********************************************************************************************//
     // Metodos para usar el servicio de NFC
     //********************************************************************************************//
@@ -294,6 +270,7 @@ public class LocalHomeActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 
     @Override
     protected void onNewIntent(Intent pIntent) {
