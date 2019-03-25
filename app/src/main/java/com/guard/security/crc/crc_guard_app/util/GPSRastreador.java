@@ -81,8 +81,11 @@ public class GPSRastreador extends Service implements LocationListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        //Log.i("PRUEBA", String.valueOf(gvLocalizacion.getLatitude())+"---"+String.valueOf(gvLocalizacion.getLongitude()));
         return gvLocalizacion;
     }
+
+
 
     //----------------------------------Permisos de Acceso----------------------------------------//
     public boolean poderObtenerLocacion() {

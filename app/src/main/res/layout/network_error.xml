@@ -6,38 +6,39 @@
     android:background="#ffffffff">
 
     <ImageView
+        android:id="@+id/a"
         android:layout_width="match_parent"
         android:layout_height="120dp"
-        android:id="@+id/a"
+        android:background="@color/red_500"
+        android:contentDescription="@string/sImg_Error"
         android:gravity="center"
-        android:background="#DA5F6A"
-        android:src="@drawable/error"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter"
+        android:src="@drawable/error" />
 
     <TextView
+        android:id="@+id/text_dialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Error de Red... Verifique la conexión a internet"
-        android:id="@+id/text_dialog"
         android:layout_below="@+id/a"
-        android:layout_marginTop="20dp"
+        android:layout_centerHorizontal="true"
         android:layout_marginLeft="4dp"
+        android:layout_marginTop="20dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="20dp"
-        android:textSize="18sp"
+        android:gravity="center_horizontal"
+        android:text="@string/sError_carga"
         android:textColor="#ff000000"
-        android:layout_centerHorizontal="true"
-        android:gravity="center_horizontal" />
+        android:textSize="18sp" />
 
     <Button
+        android:id="@+id/btn_dialog_net"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ok"
-        android:id="@+id/btn_dialog_net"
-        android:gravity="center_vertical|center_horizontal"
         android:layout_below="@+id/text_dialog"
-        android:layout_marginBottom="20dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="@string/sOK"
         android:textColor="#ffffffff" />
 
 </RelativeLayout>

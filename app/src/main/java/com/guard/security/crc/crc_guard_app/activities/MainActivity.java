@@ -52,6 +52,7 @@ import com.guard.security.crc.crc_guard_app.webview.WebInterface;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Documented;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,8 +62,11 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
-    private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
-    //private String mURL = "http://201.196.88.8:9091/crccoding/f?p=2560";
+    //IP Public ALFA
+    //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+    //Desa Externo
+    private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
+    //IP Desa
     //private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560:1";
 
     private SQLiteDatabase db;
@@ -88,10 +92,11 @@ public class MainActivity extends AppCompatActivity {
     private Uri gvCapturedImageURI = null;
     private ValueCallback<Uri[]> gvFilePathCallback;
     private String gvCameraPhotoPath;
+
     //********************************************************************************************//
     // Metodos de inicializacion
     //********************************************************************************************//
-
+    /*
     private void initUIComponents() {
         gvWebView = (WebView) findViewById(R.id.WebView);
         gvProgressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -134,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
     }
-
+    */
     //********************************************************************************************//
     // Metodos de validacion
     //********************************************************************************************//
@@ -178,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.READ_PHONE_STATE}, gvALL_PERMISSION);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return telephonyManager.getImei();
-        }else{
+        } else {
             return telephonyManager.getDeviceId();
         }
     }
@@ -208,10 +213,11 @@ public class MainActivity extends AppCompatActivity {
             // El ID es auto incrementable como declaramos en el DatabaseHandler
             nuevoRegistro.put("imei_device", pMarca.getImei());
             nuevoRegistro.put("nfc_data", pMarca.getNfcData());
-            nuevoRegistro.put("hora_marca", pMarca.getHoraMarca().toString());
+            nuevoRegistro.put("hora_marca", pMarca.getHoraMarca());
             nuevoRegistro.put("latitud", pMarca.getLat());
             nuevoRegistro.put("longitud", pMarca.getLng());
             nuevoRegistro.put("ind_estado", "PRC");
+            nuevoRegistro.put("num_serial",pMarca.getNum_serial());
 
 
             //Insertamos el registro en la base de datos
@@ -230,17 +236,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        if (validarEstadoRed()) {
-            if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
-                solicitarAccesos();
+        //
+
+
+        //if (validarEstadoRed()) {
+        if (1 == 2) {
+            {
+                if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
+                    solicitarAccesos();
+                }
             }
-            if(!hasPermissions(MainActivity.this, gvPERMISSIONS)){
+            if (!hasPermissions(MainActivity.this, gvPERMISSIONS)) {
                 ActivityCompat.requestPermissions(MainActivity.this, gvPERMISSIONS, gvPERMISSION_ALL);
             }
-            /*initUIComponents();
-            initWebviewComponents();
-            initDb();
-            initNFCComponents();*/
             gvContext = this;
             // Declaracion del elemento xml en la clase para configuraciones
             gvWebView = findViewById(R.id.WebView);
@@ -258,12 +266,12 @@ public class MainActivity extends AppCompatActivity {
             // Habilitacion de Javascript en el webview
             gvWebView.getSettings().setJavaScriptEnabled(true);
             // Inicializacion de interfaz de javascript entre webview y app android
-            gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS),"Android");
+            gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS), "Android");
             // Permite el acceso a documentos
             gvWebView.getSettings().setAllowFileAccess(true);
             // Carga de URL en el elemento Webview
             gvWebView.loadUrl(mURL);
-            gvWebView.setWebChromeClient(new WebChromeClient(){
+            gvWebView.setWebChromeClient(new WebChromeClient() {
                 // page loading progress, gone when fully loaded
                 public void onProgressChanged(WebView view, int progress) {
                     if (progress < 100 && gvProgressBar.getVisibility() == ProgressBar.GONE) {
@@ -274,6 +282,7 @@ public class MainActivity extends AppCompatActivity {
                         gvProgressBar.setVisibility(ProgressBar.GONE);
                     }
                 }
+
                 @Override
                 public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
                     if (gvFilePathCallback != null) {
@@ -323,6 +332,7 @@ public class MainActivity extends AppCompatActivity {
 
                     return true;
                 }
+
                 // creating image files (Lollipop only)
                 private File createImageFile() throws IOException {
 
@@ -333,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     // create an image file name
-                    imageStorageDir  = new File(imageStorageDir + File.separator + "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+                    imageStorageDir = new File(imageStorageDir + File.separator + "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
                     return imageStorageDir;
                 }
 
@@ -416,13 +426,14 @@ public class MainActivity extends AppCompatActivity {
     //********************************************************************************************//
     // Metodos para usar el servicio de NFC
     //********************************************************************************************//
+    //Metodo compartido entre Main y Local Activity
     private void readFromIntent(Intent pIntent) {
         String action = pIntent.getAction();
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)
                 || NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)
                 || NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
             gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            Toast.makeText(this, "Etiqueta Detectada", Toast.LENGTH_SHORT ).show();
+            Toast.makeText(this, "Etiqueta Detectada", Toast.LENGTH_SHORT).show();
             sonarAlarma();
             Parcelable[] rawMsgs = pIntent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
             NdefMessage[] msgs = null;
@@ -432,19 +443,33 @@ public class MainActivity extends AppCompatActivity {
                     msgs[i] = (NdefMessage) rawMsgs[i];
                 }
             }
-            buildTagViews(msgs);
+            buildTagViews(msgs,getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
         }
     }
+    //Metodo compartido entre Main y Local Activity
+    private String getTagSerial_number(byte[] tagId) {
+        String hexdump = null;
+        for (int i = 0; i < tagId.length; i++) {
+            String x = Integer.toHexString(((int) tagId[i] & 0xff));
+            if (x.length() == 1) {
+                x = '0' + x;
+            }
+            if (hexdump == null) {
+                hexdump = x;
+            } else {
+                hexdump += ':' + x;
+            }
+        }
+        return hexdump;
+    }
 
-    private void buildTagViews(NdefMessage[] pMsgs) {
+    private void buildTagViews(NdefMessage[] pMsgs,String pNumSerial) {
         if (pMsgs == null || pMsgs.length == 0) return;
 
         String text = "";
         byte[] payload = pMsgs[0].getRecords()[0].getPayload();
         String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16"; // Get the Text Encoding
         int languageCodeLength = payload[0] & 0063; // Get the Language Code, e.g. "en"
-        // String languageCode = new String(payload, 1, languageCodeLength, "US-ASCII");
-        // String tagId = new String(msgs[0].getRecords()[0].getType());
         try {
             // Get the Text
             text = new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
@@ -457,7 +482,8 @@ public class MainActivity extends AppCompatActivity {
         gvGPS = new GPSRastreador(this);
         Marca marca = new Marca(obtenerIdentificador(),
                 text,
-                dateFormat.format(date).toString(),
+                pNumSerial,
+                dateFormat.format(date),
                 Double.toString(gvGPS.obtenerLatitud()),
                 Double.toString(gvGPS.obtenerLongitud()));
         registrarMarca(marca);
@@ -470,7 +496,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void sonarAlarma(){
+    public void sonarAlarma() {
         try {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
@@ -492,14 +518,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         if (gvNfcAdapter != null)
             gvNfcAdapter.disableForegroundDispatch(this);
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (gvNfcAdapter != null) {
@@ -516,21 +542,20 @@ public class MainActivity extends AppCompatActivity {
         // code for all versions except of Lollipop
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 
-            if(requestCode==gvFILECHOOSER_RESULTCODE) {
+            if (requestCode == gvFILECHOOSER_RESULTCODE) {
                 if (null == this.gvUploadMessage) {
                     return;
                 }
-                Uri result=null;
-                try{
+                Uri result = null;
+                try {
                     if (resultCode != RESULT_OK) {
                         result = null;
                     } else {
                         // retrieve from the private variable if the intent is null
                         result = data == null ? gvCapturedImageURI : data.getData();
                     }
-                }
-                catch(Exception e) {
-                    Toast.makeText(getApplicationContext(), "activity :"+e, Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "activity :" + e, Toast.LENGTH_LONG).show();
                 }
                 gvUploadMessage.onReceiveValue(result);
                 gvUploadMessage = null;

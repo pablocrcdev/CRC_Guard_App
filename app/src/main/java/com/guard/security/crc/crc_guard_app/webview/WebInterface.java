@@ -154,7 +154,8 @@ public class WebInterface {
                 String lat = cursor.getString(cursor.getColumnIndex("latitud"));
                 String lng = cursor.getString(cursor.getColumnIndex("longitud"));
                 String estado = cursor.getString(cursor.getColumnIndex("ind_estado"));
-                list.add(new Marca(dbId, idDevice, nfcData, horaMarca, lat, lng, estado));
+                String numSerial = cursor.getString(cursor.getColumnIndex("num_serial"));
+                list.add(new Marca(dbId, idDevice, numSerial, nfcData, horaMarca, lat, lng, estado));
                 cursor.moveToNext();
             }
         }

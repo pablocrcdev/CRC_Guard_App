@@ -43,20 +43,23 @@ public class MarcaAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(layout, null);
             vh = new ViewHolder();
-            vh.numMarca = (TextView) convertView.findViewById(R.id.textViewNumMarca);
+            /*vh.numMarca =  convertView.findViewById(R.id.textViewNumMarca);
             //vh.idDevice = (TextView) convertView.findViewById(R.id.textViewIdDevice);
             //vh.nfcData = (TextView) convertView.findViewById(R.id.textViewNfcData);
-            vh.horaMarca = (TextView) convertView.findViewById(R.id.textViewHoraMarca);
+            vh.horaMarca =  convertView.findViewById(R.id.textViewHoraMarca);
             //vh.latitud = (TextView) convertView.findViewById(R.id.textViewLatitud);
             //vh.longitud = (TextView) convertView.findViewById(R.id.textViewLongitud);
-            vh.estado = (TextView) convertView.findViewById(R.id.textViewIndEstado);
+            vh.estado =  convertView.findViewById(R.id.textViewIndEstado);*/
+            vh.estado =  convertView.findViewById(R.id.txtEstado);
+            vh.horaMarca =  convertView.findViewById(R.id.txtTitulo_Hora);
+            vh.numMarca = convertView.findViewById(R.id.txtTitulo_Marca);
             convertView.setTag(vh);
         } else {
             vh = (ViewHolder) convertView.getTag();
         }
 
         Marca currentMarca = list.get(position);
-
+        /*
         vh.numMarca.setText(currentMarca.getDbId()+"");
         //vh.idDevice.setText(currentMarca.getImei());
         //vh.nfcData.setText(currentMarca.getNfcData());
@@ -64,17 +67,25 @@ public class MarcaAdapter extends BaseAdapter {
         //vh.latitud.setText(currentMarca.getLat());
         //vh.longitud.setText(currentMarca.getLng());
         vh.estado.setText(currentMarca.getEstado());
+        */
+        String Resultado_Estado;
+        if (currentMarca.getEstado().contains("PRC")){
+            Resultado_Estado = "Procesado.";
+        }else if(currentMarca.getEstado().contains("PEN")){
+            Resultado_Estado = "Pendiente.";
+        }else{
+            Resultado_Estado = currentMarca.getEstado();
+        }
+        vh.estado.setText(Resultado_Estado);
+        vh.numMarca.setText("Marca #"+currentMarca.getDbId());
+        vh.horaMarca.setText("Hora: "+currentMarca.getHoraMarca());
 
         return convertView;
     }
 
     public class ViewHolder {
         TextView numMarca;
-        //TextView idDevice;
-        //TextView nfcData;
         TextView horaMarca;
-        //TextView latitud;
-        //TextView longitud;
         TextView estado;
     }
 }

@@ -1,7 +1,5 @@
 package com.guard.security.crc.crc_guard_app.model;
 
-import java.util.Date;
-
 public class Marca {
     private int dbId;
     private String imei;
@@ -11,7 +9,10 @@ public class Marca {
     private String lng;
     private String estado;
 
-    public Marca(int pDbId, String pImei, String pNfcData, String pHoraMarca, String pLat, String pLng, String pEstado){
+
+    private String num_serial;
+
+    public Marca(int pDbId, String pImei, String pNfcData, String pNumSerial, String pHoraMarca, String pLat, String pLng, String pEstado) {
         this.dbId = pDbId;
         this.imei = pImei;
         this.nfcData = pNfcData;
@@ -19,14 +20,32 @@ public class Marca {
         this.lat = pLat;
         this.lng = pLng;
         this.estado = pEstado;
+        this.num_serial = pNumSerial;
     }
 
-    public Marca(String pImei, String pNfcData, String pHoraMarca, String pLat, String pLng){
+    public Marca(String pImei, String pNfcData, String pHoraMarca, String pLat, String pLng) {
         this.imei = pImei;
         this.nfcData = pNfcData;
         this.horaMarca = pHoraMarca;
         this.lat = pLat;
         this.lng = pLng;
+    }
+
+    public Marca(String pImei, String pNfcData, String pNumSerial, String pHoraMarca, String pLat, String pLng) {
+        this.imei = pImei;
+        this.nfcData = pNfcData;
+        this.horaMarca = pHoraMarca;
+        this.lat = pLat;
+        this.lng = pLng;
+        this.num_serial = pNumSerial;
+    }
+
+    public String getNum_serial() {
+        return num_serial;
+    }
+
+    public void setNum_serial(String num_serial) {
+        this.num_serial = num_serial;
     }
 
     public int getDbId() {

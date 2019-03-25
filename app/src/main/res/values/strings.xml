@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">CRC Coding</string>
+    <!--Acciones de botones-->
+    <string name="sOK">OK</string>
+    <!--Errores-->
+    <string name="sError_carga">Error al cargar la página... Intente nuevamente</string>
+    <string name="sError_Red">Error de Red... Verifique la conexión a internet</string>
+    <!--Descripciones de Imagenes-->
+    <string name="sImg_Advertencia">Advertencia</string>
+    <string name="sImg_Error">Error</string>
 </resources>

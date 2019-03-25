@@ -1,5 +1,6 @@
 package com.guard.security.crc.crc_guard_app.activities;
-
+//TODO Mostrar algo cuando el listview está vacio ya qe la app se queda en blanco sin nada que mostrar
+//TODO reinstalar la app en cada telefono
 import android.Manifest;
 import android.app.PendingIntent;
 import android.content.ContentValues;
@@ -11,22 +12,17 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -34,7 +30,6 @@ import com.guard.security.crc.crc_guard_app.R;
 import com.guard.security.crc.crc_guard_app.adapters.MarcaAdapter;
 import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
-import com.guard.security.crc.crc_guard_app.util.ErrorController;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
 
 import java.io.UnsupportedEncodingException;
@@ -49,7 +44,6 @@ public class LocalHomeActivity extends AppCompatActivity {
     private SQLiteDatabase db;
 
     private ListView listView;
-    //private Button btnCreate;
     private MarcaAdapter adapter;
     private List<Marca> marcas;
 
@@ -91,7 +85,7 @@ public class LocalHomeActivity extends AppCompatActivity {
                 Manifest.permission.READ_PHONE_STATE}, gvALL_PERMISSION);
     }
 
-    protected void validarAccesos(){
+    protected void validarAccesos() {
         int permissionCheck = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_PHONE_STATE);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
@@ -107,7 +101,7 @@ public class LocalHomeActivity extends AppCompatActivity {
     //********************************************************************************************//
     // Inicializadores
     //********************************************************************************************//
-    private void initNFCComponents(){
+    private void initNFCComponents() {
 
 
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -132,7 +126,7 @@ public class LocalHomeActivity extends AppCompatActivity {
         // Seleccionamos todos los registros de la tabla Cars
         //Cursor cursor = db.rawQuery("select * from marca_reloj where imei_device="+obtenerIdentificador(), null);
         Cursor cursor = db.rawQuery("select * from marca_reloj", null);
-        List<Marca> list = new ArrayList<Marca>();
+        List<Marca> list = new ArrayList<>();
 
         if (cursor.moveToFirst()) {
             // iteramos sobre el cursor de resultados,
@@ -146,7 +140,8 @@ public class LocalHomeActivity extends AppCompatActivity {
                 String lat = cursor.getString(cursor.getColumnIndex("latitud"));
                 String lng = cursor.getString(cursor.getColumnIndex("longitud"));
                 String estado = cursor.getString(cursor.getColumnIndex("ind_estado"));
-                list.add(new Marca(dbId, idDevice, nfcData, horaMarca, lat, lng, estado));
+                String numSerial = cursor.getString(cursor.getColumnIndex("num_serial"));
+                list.add(new Marca(dbId, idDevice, nfcData, numSerial, horaMarca, lat, lng, estado));
 
                 cursor.moveToNext();
             }
@@ -162,9 +157,10 @@ public class LocalHomeActivity extends AppCompatActivity {
             // El ID es auto incrementable como declaramos en el DatabaseHandler
             nuevoRegistro.put("imei_device", pMarca.getImei());
             nuevoRegistro.put("nfc_data", pMarca.getNfcData());
-            nuevoRegistro.put("hora_marca", pMarca.getHoraMarca().toString());
+            nuevoRegistro.put("hora_marca", pMarca.getHoraMarca());
             nuevoRegistro.put("latitud", pMarca.getLat());
             nuevoRegistro.put("longitud", pMarca.getLng());
+            nuevoRegistro.put("num_serial", pMarca.getNum_serial());
 
             //Insertamos el registro en la base de datos
             db.insert("marca_reloj", null, nuevoRegistro);
@@ -180,7 +176,7 @@ public class LocalHomeActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    private void create(){
+    private void create() {
         //Si hemos abierto correctamente la base de datos
         if (db != null) {
             //Creamos el registro a insertar como objeto ContentValues
@@ -195,6 +191,7 @@ public class LocalHomeActivity extends AppCompatActivity {
             db.insert("marca_reloj", null, nuevoRegistro);
         }
     }
+
     //********************************************************************************************//
     // Metodos para obtener datos del dispositivo
     //********************************************************************************************//
@@ -208,13 +205,14 @@ public class LocalHomeActivity extends AppCompatActivity {
     //********************************************************************************************//
     // Metodos para usar el servicio de NFC
     //********************************************************************************************//
+    //Metodo compartido entre Main y Local Activity
     private void readFromIntent(Intent pIntent) {
         String action = pIntent.getAction();
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)
                 || NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)
                 || NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
             gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            Toast.makeText(this, "Etiqueta Detectada", Toast.LENGTH_SHORT ).show();
+            Toast.makeText(this, "Etiqueta Detectada", Toast.LENGTH_SHORT).show();
             sonarAlarma();
             Parcelable[] rawMsgs = pIntent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
             NdefMessage[] msgs = null;
@@ -224,19 +222,17 @@ public class LocalHomeActivity extends AppCompatActivity {
                     msgs[i] = (NdefMessage) rawMsgs[i];
                 }
             }
-            buildTagViews(msgs);
+            buildTagViews(msgs,getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
         }
     }
 
-    private void buildTagViews(NdefMessage[] pMsgs) {
+    private void buildTagViews(NdefMessage[] pMsgs,String pNumSerial) {
         if (pMsgs == null || pMsgs.length == 0) return;
 
         String text = "";
         byte[] payload = pMsgs[0].getRecords()[0].getPayload();
         String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16"; // Get the Text Encoding
         int languageCodeLength = payload[0] & 0063; // Get the Language Code, e.g. "en"
-        // String languageCode = new String(payload, 1, languageCodeLength, "US-ASCII");
-        // String tagId = new String(msgs[0].getRecords()[0].getType());
         try {
             // Get the Text
             text = new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
@@ -247,11 +243,10 @@ public class LocalHomeActivity extends AppCompatActivity {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         gvGPS = new GPSRastreador(this);
-        //tvNFCContent.setText("NFC Content: " + text);
-        //gvWebView.loadUrl("javascript:" + "readNFCTag('" + text + "');");
         Marca marca = new Marca(obtenerIdentificador(),
                 text,
-                dateFormat.format(date).toString(),
+                pNumSerial,
+                dateFormat.format(date),
                 Double.toString(gvGPS.obtenerLatitud()),
                 Double.toString(gvGPS.obtenerLongitud()));
 
@@ -261,7 +256,24 @@ public class LocalHomeActivity extends AppCompatActivity {
 
     }
 
-    public void sonarAlarma(){
+    //Metodo compartido entre Main y Local Activity
+    private String getTagSerial_number(byte[] tagId) {
+        String hexdump = null;
+        for (int i = 0; i < tagId.length; i++) {
+            String x = Integer.toHexString(((int) tagId[i] & 0xff));
+            if (x.length() == 1) {
+                x = '0' + x;
+            }
+            if (hexdump == null) {
+                hexdump = x;
+            } else {
+                hexdump += ':' + x;
+            }
+        }
+        return hexdump;
+    }
+
+    public void sonarAlarma() {
         try {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
@@ -284,14 +296,14 @@ public class LocalHomeActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         if (gvNfcAdapter != null)
             gvNfcAdapter.disableForegroundDispatch(this);
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         if (gvNfcAdapter != null)
             gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
@@ -306,28 +318,15 @@ public class LocalHomeActivity extends AppCompatActivity {
         if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
             solicitarAccesos();
         }
-        Log.i("LOCALHOME","Inicio Local Home Activity");
         listView = findViewById(R.id.listView);
-        /*btnCreate = findViewById(R.id.buttonCreate);
-
-        // se debe quitar este listener, solo sirve de pruebas
-        btnCreate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                create();
-                actualizarListView();
-            }
-        });*/
-        marcas = new ArrayList<Marca>();
+        marcas = new ArrayList<>();
 
         //Abrimos la base de datos 'DBTest1' en modo escritura
         dbHelper = new DatabaseHandler(this, "RG", null, 1);
         db = dbHelper.getWritableDatabase();
         initNFCComponents();
-
-        adapter = new MarcaAdapter(this, marcas, R.layout.items_template);
+        adapter = new MarcaAdapter(this, marcas, R.layout.clv_row);
         listView.setAdapter(adapter);
-
         actualizarListView();
 
     }

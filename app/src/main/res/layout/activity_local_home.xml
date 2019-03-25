@@ -6,11 +6,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".activities.LocalHomeActivity">
+
     <ListView
         android:id="@+id/listView"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_weight="0.80" />
+        android:layout_weight="0.80"
+        android:background="@color/grey_200"
+        android:divider="@color/blue_grey_200"
+        android:dividerHeight="1dp"
+        android:scrollbars="vertical" />
+
 
     <!--LinearLayout
         android:layout_width="match_parent"

@@ -87,4 +87,5 @@
         android:layout_alignTop="@+id/textViewNumMarca"
         android:layout_centerHorizontal="true"
         android:text="localizacion" />
+
 </RelativeLayout>
