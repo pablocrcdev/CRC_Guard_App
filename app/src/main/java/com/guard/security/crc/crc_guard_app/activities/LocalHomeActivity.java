@@ -32,11 +32,21 @@ import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.google.gson.internal.bind.TypeAdapters.URL;
+
 
 public class LocalHomeActivity extends AppCompatActivity {
 
@@ -86,6 +96,7 @@ public class LocalHomeActivity extends AppCompatActivity {
     }
 
     protected void validarAccesos() {
+
         int permissionCheck = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_PHONE_STATE);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
@@ -95,9 +106,9 @@ public class LocalHomeActivity extends AppCompatActivity {
 
         } else {
             //TODO
+
         }
     }
-
     //********************************************************************************************//
     // Inicializadores
     //********************************************************************************************//
@@ -307,6 +318,8 @@ public class LocalHomeActivity extends AppCompatActivity {
         super.onResume();
         if (gvNfcAdapter != null)
             gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
+
+
     }
 
     @Override

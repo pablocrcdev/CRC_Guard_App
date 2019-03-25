@@ -3,6 +3,7 @@ package com.guard.security.crc.crc_guard_app.activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
@@ -49,10 +50,14 @@ import com.guard.security.crc.crc_guard_app.webview.ManagerChromeClient;
 import com.guard.security.crc.crc_guard_app.webview.ManagerWebClient;
 import com.guard.security.crc.crc_guard_app.webview.WebInterface;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Documented;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -152,6 +157,19 @@ public class MainActivity extends AppCompatActivity {
         return vNetworkInfo != null && vNetworkInfo.isConnectedOrConnecting();
     }
 
+    protected void Ned() throws IOException {
+        URL url = new URL("http://201.196.88.8:9090/crccoding/f?p=2560:1");
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        try {
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            Log.i("NEEDD","Conectado");
+        } finally {
+            urlConnection.disconnect();
+            Log.i("NEEDD","FALLO");
+        }
+    }
+
+
     protected boolean accesarLocalizacion() {
         int vResult = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         return vResult == PackageManager.PERMISSION_GRANTED;
@@ -237,10 +255,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         //
-
-
-        //if (validarEstadoRed()) {
-        if (1 == 2) {
+        try {
+            Ned();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (validarEstadoRed()) {
             {
                 if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
                     solicitarAccesos();
