@@ -1,39 +1,33 @@
 package com.guard.security.crc.crc_guard_app.activities;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.nfc.FormatException;
 import android.nfc.NdefMessage;
-import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.Ndef;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -46,22 +40,21 @@ import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
-import com.guard.security.crc.crc_guard_app.webview.ManagerChromeClient;
 import com.guard.security.crc.crc_guard_app.webview.ManagerWebClient;
 import com.guard.security.crc.crc_guard_app.webview.WebInterface;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Documented;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -148,13 +141,36 @@ public class MainActivity extends AppCompatActivity {
     //********************************************************************************************//
     // Metodos de validacion
     //********************************************************************************************//
-    protected boolean validarEstadoRed() {
+    protected boolean validarEstadoRed(){
         ConnectivityManager vConnectivityManager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo vNetworkInfo = vConnectivityManager.getActiveNetworkInfo();
+        boolean Resultado = false;
+        Resultado = vNetworkInfo != null && vNetworkInfo.isConnectedOrConnecting();
         // Si encuentra que hay conexion
         // De no encontrar conexion arroja falso
-        return vNetworkInfo != null && vNetworkInfo.isConnectedOrConnecting();
+        String Res = null;
+        try {
+            Res = new GetUrlContentTask().execute("http://192.1687.1.50:9090/crccoding").get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                // yourMethod();
+            }
+        }, 7000);
+        Log.i("RES2",Res);
+        if(new GetUrlContentTask().execute("http://192.1687.1.50:9090/crccoding").equals("SI")){
+
+            Resultado = true;
+        }else{
+            Resultado = false;
+        }
+        return Resultado;
     }
 
     protected void Ned() throws IOException {
@@ -162,10 +178,10 @@ public class MainActivity extends AppCompatActivity {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try {
             InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            Log.i("NEEDD","Conectado");
+            Log.i("NEEDD", "Conectado");
         } finally {
             urlConnection.disconnect();
-            Log.i("NEEDD","FALLO");
+            Log.i("NEEDD", "FALLO");
         }
     }
 
@@ -235,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
             nuevoRegistro.put("latitud", pMarca.getLat());
             nuevoRegistro.put("longitud", pMarca.getLng());
             nuevoRegistro.put("ind_estado", "PRC");
-            nuevoRegistro.put("num_serial",pMarca.getNum_serial());
+            nuevoRegistro.put("num_serial", pMarca.getNum_serial());
 
 
             //Insertamos el registro en la base de datos
@@ -255,11 +271,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         //
-        try {
-            Ned();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
         if (validarEstadoRed()) {
             {
                 if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
@@ -463,9 +475,10 @@ public class MainActivity extends AppCompatActivity {
                     msgs[i] = (NdefMessage) rawMsgs[i];
                 }
             }
-            buildTagViews(msgs,getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
+            buildTagViews(msgs, getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
         }
     }
+
     //Metodo compartido entre Main y Local Activity
     private String getTagSerial_number(byte[] tagId) {
         String hexdump = null;
@@ -483,7 +496,7 @@ public class MainActivity extends AppCompatActivity {
         return hexdump;
     }
 
-    private void buildTagViews(NdefMessage[] pMsgs,String pNumSerial) {
+    private void buildTagViews(NdefMessage[] pMsgs, String pNumSerial) {
         if (pMsgs == null || pMsgs.length == 0) return;
 
         String text = "";
@@ -609,4 +622,39 @@ public class MainActivity extends AppCompatActivity {
         } // end of code for Lollipop only
     }
 
+    private class GetUrlContentTask extends AsyncTask<String, Integer, String> {
+        protected String doInBackground(String... urls) {
+            String Resultado = "NO";
+            try {
+
+                URL url;
+                url = new URL(urls[0]);
+                HttpURLConnection connection;
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoOutput(true);
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+
+                connection.connect();
+
+                BufferedReader rd;
+
+                rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String content = "", line;
+
+                while ((line = rd.readLine()) != null) {
+                    content += line + "\n";
+                }
+
+                Resultado = "SI";
+            } catch (
+                    Exception ex) {
+                Resultado = "NO";
+            }
+            return Resultado;
+        }
+
+    }
 }
+
