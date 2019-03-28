@@ -55,6 +55,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -151,10 +153,12 @@ public class MainActivity extends AppCompatActivity {
         // De no encontrar conexion arroja falso
         String Res = null;
         try {
-            Res = new GetUrlContentTask().execute("http://192.1687.1.50:9090/crccoding").get();
+            Res = new GetUrlContentTask().execute("http://192.168.1.50:9090/crccoding").get(7, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
             e.printStackTrace();
         }
         Handler handler = new Handler();
@@ -164,12 +168,13 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 7000);
         Log.i("RES2",Res);
-        if(new GetUrlContentTask().execute("http://192.1687.1.50:9090/crccoding").equals("SI")){
+        if(Res.equals("SI")){
 
             Resultado = true;
         }else{
             Resultado = false;
         }
+        Log.i("RES2",String.valueOf( Resultado));
         return Resultado;
     }
 
@@ -271,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         //
-
         if (validarEstadoRed()) {
             {
                 if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
@@ -621,10 +625,13 @@ public class MainActivity extends AppCompatActivity {
             gvFilePathCallback = null;
         } // end of code for Lollipop only
     }
-
-    private class GetUrlContentTask extends AsyncTask<String, Integer, String> {
+    //Parametros AsyncTask
+    //1 = Parametros
+    //2 = Progress
+    //3 = Result
+    private class GetUrlContentTask extends AsyncTask<String, Void, String> {
         protected String doInBackground(String... urls) {
-            String Resultado = "NO";
+            String Resultado;
             try {
 
                 URL url;
@@ -635,24 +642,27 @@ public class MainActivity extends AppCompatActivity {
                 connection.setDoOutput(true);
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
-
+                Log.i("RESULTADO","conectando");
                 connection.connect();
-
+                Log.i("RESULTADO",String.valueOf(connection.getResponseCode()));
                 BufferedReader rd;
-
+                Log.i("RESULTADO","Conectado");
+                /*
                 rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String content = "", line;
-
                 while ((line = rd.readLine()) != null) {
                     content += line + "\n";
-                }
-
+                }*/
                 Resultado = "SI";
             } catch (
                     Exception ex) {
+                Log.i("RESULTADO","No conectado");
                 Resultado = "NO";
             }
             return Resultado;
+        }
+        protected void onPostExecute(String result) {
+
         }
 
     }
