@@ -1,6 +1,7 @@
 package com.guard.security.crc.crc_guard_app.activities;
 //TODO Mostrar algo cuando el listview está vacio ya qe la app se queda en blanco sin nada que mostrar
 //TODO reinstalar la app en cada telefono
+
 import android.Manifest;
 import android.app.PendingIntent;
 import android.content.ContentValues;
@@ -26,6 +27,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.guard.security.crc.crc_guard_app.R;
@@ -111,6 +113,7 @@ public class LocalHomeActivity extends AppCompatActivity {
 
         }
     }
+
     //********************************************************************************************//
     // Inicializadores
     //********************************************************************************************//
@@ -140,15 +143,16 @@ public class LocalHomeActivity extends AppCompatActivity {
         //Cursor cursor = db.rawQuery("select * from marca_reloj where imei_device="+obtenerIdentificador(), null);
         Cursor cursor = db.rawQuery("select * from marca_reloj", null);
         List<Marca> list = new ArrayList<>();
-        if (list == null){
-            LinearLayout LocaHome = findViewById(R.id.LLNo_data);
+
+        if (cursor.getCount() <= 0) {
+            //La base de datos está vacía.
+            RelativeLayout LocaHome = findViewById(R.id.LLNo_data);
             LocaHome.setVisibility(View.VISIBLE);
             return list;
         }
         if (cursor.moveToFirst()) {
-            LinearLayout LocaHome = findViewById(R.id.LLNo_data);
+            RelativeLayout LocaHome = findViewById(R.id.LLNo_data);
             LocaHome.setVisibility(View.GONE);
-            Log.i("DEBM","TIENE REGISTROS");
             // iteramos sobre el cursor de resultados,
             // y vamos rellenando el array que posteriormente devolveremos
             while (cursor.isAfterLast() == false) {
@@ -165,8 +169,6 @@ public class LocalHomeActivity extends AppCompatActivity {
 
                 cursor.moveToNext();
             }
-        }else{
-
         }
         return list;
     }
@@ -244,11 +246,11 @@ public class LocalHomeActivity extends AppCompatActivity {
                     msgs[i] = (NdefMessage) rawMsgs[i];
                 }
             }
-            buildTagViews(msgs,getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
+            buildTagViews(msgs, getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
         }
     }
 
-    private void buildTagViews(NdefMessage[] pMsgs,String pNumSerial) {
+    private void buildTagViews(NdefMessage[] pMsgs, String pNumSerial) {
         if (pMsgs == null || pMsgs.length == 0) return;
 
         String text = "";
@@ -273,7 +275,7 @@ public class LocalHomeActivity extends AppCompatActivity {
                 Double.toString(gvGPS.obtenerLongitud()));
 
         registrarMarca(marca);
-        LinearLayout LocaHome = findViewById(R.id.LLNo_data);
+        RelativeLayout LocaHome = findViewById(R.id.LLNo_data);
         LocaHome.setVisibility(View.GONE);
         actualizarListView();
     }
@@ -315,24 +317,8 @@ public class LocalHomeActivity extends AppCompatActivity {
                 gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             }
         }
-        Log.i("INTENTS","RESUME");
+        Log.i("INTENTS", "RESUMEhh");
         //Prueba
-        setContentView(R.layout.activity_local_home);
-        //Se elimina la versión anterior de la tabla
-        //validarAccesos();
-        if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
-            solicitarAccesos();
-        }
-        listView = findViewById(R.id.listView);
-        marcas = new ArrayList<>();
-
-        //Abrimos la base de datos 'DBTest1' en modo escritura
-        dbHelper = new DatabaseHandler(this, "RG", null, 1);
-        db = dbHelper.getWritableDatabase();
-        initNFCComponents();
-        adapter = new MarcaAdapter(this, marcas, R.layout.clv_row);
-        listView.setAdapter(adapter);
-        actualizarListView();
     }
 
     @Override
@@ -348,25 +334,7 @@ public class LocalHomeActivity extends AppCompatActivity {
         if (gvNfcAdapter != null)
             gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
 
-        Log.i("INTENTS","RESUME");
-        setContentView(R.layout.activity_local_home);
-        //Se elimina la versión anterior de la tabla
-        //validarAccesos();
-        if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
-            solicitarAccesos();
-        }
-        listView = findViewById(R.id.listView);
-        marcas = new ArrayList<>();
-
-        //Abrimos la base de datos 'DBTest1' en modo escritura
-        dbHelper = new DatabaseHandler(this, "RG", null, 1);
-        db = dbHelper.getWritableDatabase();
-        initNFCComponents();
-        adapter = new MarcaAdapter(this, marcas, R.layout.clv_row);
-        listView.setAdapter(adapter);
-        actualizarListView();
-
-
+        Log.i("INTENTS", "RESUME");
     }
 
     @Override
@@ -375,7 +343,7 @@ public class LocalHomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_local_home);
         //Se elimina la versión anterior de la tabla
         //validarAccesos();
-        Log.i("INTENTS","RESUME");
+        Log.i("INTENTS", "RESUMEgg");
         if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
             solicitarAccesos();
         }
@@ -389,7 +357,6 @@ public class LocalHomeActivity extends AppCompatActivity {
         adapter = new MarcaAdapter(this, marcas, R.layout.clv_row);
         listView.setAdapter(adapter);
         actualizarListView();
-
     }
 
     @Override

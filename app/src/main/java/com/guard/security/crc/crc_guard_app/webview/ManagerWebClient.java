@@ -19,6 +19,7 @@ public class ManagerWebClient extends WebViewClient {
     boolean timeout;
     private Context gvContext;
     private NfcAdapter gvNfcAdapter;
+
     //============================================================================================//
     // El contructor se define con el parametro de contexto para refenrenciar siempre al activity
     // que este en primer plano y poder aplicar funciones sobre el mismo
@@ -27,6 +28,7 @@ public class ManagerWebClient extends WebViewClient {
         timeout = true;
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(gvContext);
     }
+
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         // Se define el hilo para manejar el tiempo de espera de respuesta
@@ -39,14 +41,14 @@ public class ManagerWebClient extends WebViewClient {
                     e.printStackTrace();
                     // Manejo de la excepcion en caso de error
                 }
-                if(timeout) {
+                if (timeout) {
                     if (gvNfcAdapter != null) {
-                        Log.i("JOD","Entrando en local");
+                        Log.i("JOD", "Entrando en local");
                         Intent intent = new Intent(gvContext, LocalHomeActivity.class);
                         gvContext.startActivity(intent);
-                    }else{
+                    } else {
                         new ErrorController(gvContext).showErrorDialog();
-                   }
+                    }
                     // Si es excedido el tiempo de espera se efectua la instruccion
                 }
             }
@@ -58,15 +60,19 @@ public class ManagerWebClient extends WebViewClient {
         // Al terminar de cargar si la pagina no devuelve respuesta se define el tiempo de respuesta como falso
         timeout = false;
     }
+
     // La funcion solo se ejecutara al determinar algun error al cargar el webview
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         //
         if (gvNfcAdapter != null) {
-            //Log.i("JOD",error.getDescription().toString());
-            Intent intent = new Intent(gvContext, LocalHomeActivity.class);
-            gvContext.startActivity(intent);
-        }else{
+            Log.i("JOD", error.getDescription().toString());
+            //ERR_CACHE_MISS
+            if(error.getDescription().toString().equals("ERR_CACHE_MISS")) {
+                Intent intent = new Intent(gvContext, LocalHomeActivity.class);
+                gvContext.startActivity(intent);
+            }
+        } else {
             view.setVisibility(View.INVISIBLE);
             new ErrorController(gvContext).showErrorDialog();
         }

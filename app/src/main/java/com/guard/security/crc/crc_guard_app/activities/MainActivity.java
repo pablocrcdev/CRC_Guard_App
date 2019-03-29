@@ -93,16 +93,17 @@ public class MainActivity extends AppCompatActivity {
     // Metodos de validacion
     //********************************************************************************************//
     protected boolean validarEstadoRed() {
+
         ConnectivityManager vConnectivityManager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo vNetworkInfo = vConnectivityManager.getActiveNetworkInfo();
-        boolean Resultado = false;
+        boolean Resultado;
         Resultado = vNetworkInfo != null && vNetworkInfo.isConnectedOrConnecting();
         // Si encuentra que hay conexion
         // De no encontrar conexion arroja falso
         String Res = null;
         try {
-            Res = new GetUrlContentTask().execute("http://186.96.89.66:9090/crccoding").get(7, TimeUnit.SECONDS);
+            Res = new GetUrlContentTask().execute(mURL).get(7, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -116,14 +117,11 @@ public class MainActivity extends AppCompatActivity {
                 // yourMethod();
             }
         }, 7000);
-        Log.i("RES2", Res);
         if (Res.equals("SI")) {
-
             Resultado = true;
         } else {
             Resultado = false;
         }
-        Log.i("RES2", String.valueOf(Resultado));
         return Resultado;
     }
 
@@ -213,7 +211,6 @@ public class MainActivity extends AppCompatActivity {
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         //
         if (validarEstadoRed()) {
-            Log.i("REDDS","VALIDO");
             {
                 if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
                     solicitarAccesos();
@@ -381,10 +378,8 @@ public class MainActivity extends AppCompatActivity {
             if (gvNfcAdapter == null)
                 new ErrorController(this).showNetworkDialog();
             else {
-                /*
                 Intent intent = new Intent(this, LocalHomeActivity.class);
-                startActivity(intent);*/
-
+                startActivity(intent);
             }
         }
     }

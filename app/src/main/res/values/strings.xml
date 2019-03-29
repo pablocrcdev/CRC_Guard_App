@@ -5,7 +5,10 @@
     <!--Errores-->
     <string name="sError_carga">Error al cargar la página... Intente nuevamente</string>
     <string name="sError_Red">Error de Red... Verifique la conexión a internet</string>
+    <string name="sNo_hay_Marcas">No hay marcas registradas</string>
     <!--Descripciones de Imagenes-->
     <string name="sImg_Advertencia">Advertencia</string>
     <string name="sImg_Error">Error</string>
+    <!--Detalles-->
+    <string name="sModo_Fuera_Linea">Modo fuera de linea</string>
 </resources>
