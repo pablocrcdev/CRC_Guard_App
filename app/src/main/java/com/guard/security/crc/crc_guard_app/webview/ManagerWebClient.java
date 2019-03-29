@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.nfc.NfcAdapter;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -40,6 +41,7 @@ public class ManagerWebClient extends WebViewClient {
                 }
                 if(timeout) {
                     if (gvNfcAdapter != null) {
+                        Log.i("JOD","Entrando en local");
                         Intent intent = new Intent(gvContext, LocalHomeActivity.class);
                         gvContext.startActivity(intent);
                     }else{
@@ -61,6 +63,7 @@ public class ManagerWebClient extends WebViewClient {
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         //
         if (gvNfcAdapter != null) {
+            //Log.i("JOD",error.getDescription().toString());
             Intent intent = new Intent(gvContext, LocalHomeActivity.class);
             gvContext.startActivity(intent);
         }else{

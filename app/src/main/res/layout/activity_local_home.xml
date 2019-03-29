@@ -17,26 +17,19 @@
         android:dividerHeight="1dp"
         android:scrollbars="vertical" />
 
-
-    <!--LinearLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.20"
-        android:gravity="center"
-        android:orientation="vertical">
-
-
-        <Button
-            android:id="@+id/buttonCreate"
+        android:layout_height="match_parent"
+        android:id="@+id/LLNo_data"
+        android:visibility="gone">
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create data" />
+            android:text="No hay marcas registradas"
 
-        <Button
-            android:id="@+id/buttonDelete"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Remove data" />
-    </LinearLayout-->
-
+            android:layout_gravity="center"
+            android:textSize="24dp"
+            android:textAlignment="center"
+            />
+    </LinearLayout>
 </LinearLayout>

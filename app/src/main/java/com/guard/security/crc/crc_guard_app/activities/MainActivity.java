@@ -43,12 +43,8 @@ import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
 import com.guard.security.crc.crc_guard_app.webview.ManagerWebClient;
 import com.guard.security.crc.crc_guard_app.webview.WebInterface;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -63,9 +59,9 @@ public class MainActivity extends AppCompatActivity {
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
     //IP Public ALFA
-    //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+    private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
     //Desa Externo
-    private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
+    //private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
     //IP Desa
     //private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560:1";
 
@@ -94,56 +90,9 @@ public class MainActivity extends AppCompatActivity {
     private String gvCameraPhotoPath;
 
     //********************************************************************************************//
-    // Metodos de inicializacion
-    //********************************************************************************************//
-    /*
-    private void initUIComponents() {
-        gvWebView = (WebView) findViewById(R.id.WebView);
-        gvProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        gvContext = this;
-        if (gvNfcAdapter == null) {
-            Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
-            finish();
-        } else if (!gvNfcAdapter.isEnabled()) {
-            Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void initWebviewComponents() {
-        // Seteo de Cliente Web, para manejo de navegador interno
-        gvWebView.setWebViewClient(new ManagerWebClient(this));
-        // Habilitacion de Javascript en el webview
-        gvWebView.getSettings().setJavaScriptEnabled(true);
-        // Inicializacion de interfaz de javascript entre webview y app android
-        gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS), "Android");
-        // Permite el acceso a documentos
-        gvWebView.getSettings().setAllowFileAccess(true);
-        // Carga de URL en el elemento Webview
-        gvWebView.loadUrl(mURL);
-
-        gvWebView.setWebChromeClient(new ManagerChromeClient(this));
-
-    }
-
-    private void initDb() {
-        //Abrimos la base de datos 'DBTest1' en modo escritura
-        dbhelper = new DatabaseHandler(this, "RG", null, 1);
-        db = dbhelper.getWritableDatabase();
-    }
-
-    private void initNFCComponents(){
-        readFromIntent(getIntent());
-
-        gvPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-        IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
-        tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
-    }
-    */
-    //********************************************************************************************//
     // Metodos de validacion
     //********************************************************************************************//
-    protected boolean validarEstadoRed(){
+    protected boolean validarEstadoRed() {
         ConnectivityManager vConnectivityManager = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo vNetworkInfo = vConnectivityManager.getActiveNetworkInfo();
@@ -153,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         // De no encontrar conexion arroja falso
         String Res = null;
         try {
-            Res = new GetUrlContentTask().execute("http://192.168.1.50:9090/crccoding").get(7, TimeUnit.SECONDS);
+            Res = new GetUrlContentTask().execute("http://186.96.89.66:9090/crccoding").get(7, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -167,27 +116,15 @@ public class MainActivity extends AppCompatActivity {
                 // yourMethod();
             }
         }, 7000);
-        Log.i("RES2",Res);
-        if(Res.equals("SI")){
+        Log.i("RES2", Res);
+        if (Res.equals("SI")) {
 
             Resultado = true;
-        }else{
+        } else {
             Resultado = false;
         }
-        Log.i("RES2",String.valueOf( Resultado));
+        Log.i("RES2", String.valueOf(Resultado));
         return Resultado;
-    }
-
-    protected void Ned() throws IOException {
-        URL url = new URL("http://201.196.88.8:9090/crccoding/f?p=2560:1");
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            Log.i("NEEDD", "Conectado");
-        } finally {
-            urlConnection.disconnect();
-            Log.i("NEEDD", "FALLO");
-        }
     }
 
 
@@ -204,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
     protected void solicitarAccesos() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
                 ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_PHONE_STATE)) {
-            //Codigo extra para el manejo de peticiones de permiso, en esta parte se colocalan
+            //Codigo extra para el manejo de peticiones de permiso, en esta parte se colocan
             //explicaciones con respecto a los permisos. Pueden ser ventanas emergentes o Toast
         }
         ActivityCompat.requestPermissions(this, new String[]{
@@ -235,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             }
-
         }
         return true;
     }
@@ -277,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         //
         if (validarEstadoRed()) {
+            Log.i("REDDS","VALIDO");
             {
                 if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
                     solicitarAccesos();
@@ -292,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
             gvProgressBar = findViewById(R.id.progressBar);
 
             if (gvNfcAdapter == null) {
-                Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "El dispositivo no soporta NFC.", Toast.LENGTH_LONG).show();
                 //finish();
             } else if (!gvNfcAdapter.isEnabled()) {
                 Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
@@ -325,7 +262,6 @@ public class MainActivity extends AppCompatActivity {
                         gvFilePathCallback.onReceiveValue(null);
                     }
                     gvFilePathCallback = filePathCallback;
-
                     Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
 
@@ -445,8 +381,10 @@ public class MainActivity extends AppCompatActivity {
             if (gvNfcAdapter == null)
                 new ErrorController(this).showNetworkDialog();
             else {
+                /*
                 Intent intent = new Intent(this, LocalHomeActivity.class);
-                startActivity(intent);
+                startActivity(intent);*/
+
             }
         }
     }
@@ -625,6 +563,7 @@ public class MainActivity extends AppCompatActivity {
             gvFilePathCallback = null;
         } // end of code for Lollipop only
     }
+
     //Parametros AsyncTask
     //1 = Parametros
     //2 = Progress
@@ -642,25 +581,15 @@ public class MainActivity extends AppCompatActivity {
                 connection.setDoOutput(true);
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
-                Log.i("RESULTADO","conectando");
                 connection.connect();
-                Log.i("RESULTADO",String.valueOf(connection.getResponseCode()));
-                BufferedReader rd;
-                Log.i("RESULTADO","Conectado");
-                /*
-                rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String content = "", line;
-                while ((line = rd.readLine()) != null) {
-                    content += line + "\n";
-                }*/
                 Resultado = "SI";
             } catch (
                     Exception ex) {
-                Log.i("RESULTADO","No conectado");
                 Resultado = "NO";
             }
             return Resultado;
         }
+
         protected void onPostExecute(String result) {
 
         }

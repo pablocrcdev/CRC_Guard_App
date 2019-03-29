@@ -23,6 +23,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -138,8 +140,15 @@ public class LocalHomeActivity extends AppCompatActivity {
         //Cursor cursor = db.rawQuery("select * from marca_reloj where imei_device="+obtenerIdentificador(), null);
         Cursor cursor = db.rawQuery("select * from marca_reloj", null);
         List<Marca> list = new ArrayList<>();
-
+        if (list == null){
+            LinearLayout LocaHome = findViewById(R.id.LLNo_data);
+            LocaHome.setVisibility(View.VISIBLE);
+            return list;
+        }
         if (cursor.moveToFirst()) {
+            LinearLayout LocaHome = findViewById(R.id.LLNo_data);
+            LocaHome.setVisibility(View.GONE);
+            Log.i("DEBM","TIENE REGISTROS");
             // iteramos sobre el cursor de resultados,
             // y vamos rellenando el array que posteriormente devolveremos
             while (cursor.isAfterLast() == false) {
@@ -156,6 +165,8 @@ public class LocalHomeActivity extends AppCompatActivity {
 
                 cursor.moveToNext();
             }
+        }else{
+
         }
         return list;
     }
@@ -262,9 +273,9 @@ public class LocalHomeActivity extends AppCompatActivity {
                 Double.toString(gvGPS.obtenerLongitud()));
 
         registrarMarca(marca);
-
+        LinearLayout LocaHome = findViewById(R.id.LLNo_data);
+        LocaHome.setVisibility(View.GONE);
         actualizarListView();
-
     }
 
     //Metodo compartido entre Main y Local Activity
@@ -304,6 +315,24 @@ public class LocalHomeActivity extends AppCompatActivity {
                 gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             }
         }
+        Log.i("INTENTS","RESUME");
+        //Prueba
+        setContentView(R.layout.activity_local_home);
+        //Se elimina la versión anterior de la tabla
+        //validarAccesos();
+        if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
+            solicitarAccesos();
+        }
+        listView = findViewById(R.id.listView);
+        marcas = new ArrayList<>();
+
+        //Abrimos la base de datos 'DBTest1' en modo escritura
+        dbHelper = new DatabaseHandler(this, "RG", null, 1);
+        db = dbHelper.getWritableDatabase();
+        initNFCComponents();
+        adapter = new MarcaAdapter(this, marcas, R.layout.clv_row);
+        listView.setAdapter(adapter);
+        actualizarListView();
     }
 
     @Override
@@ -319,6 +348,24 @@ public class LocalHomeActivity extends AppCompatActivity {
         if (gvNfcAdapter != null)
             gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
 
+        Log.i("INTENTS","RESUME");
+        setContentView(R.layout.activity_local_home);
+        //Se elimina la versión anterior de la tabla
+        //validarAccesos();
+        if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
+            solicitarAccesos();
+        }
+        listView = findViewById(R.id.listView);
+        marcas = new ArrayList<>();
+
+        //Abrimos la base de datos 'DBTest1' en modo escritura
+        dbHelper = new DatabaseHandler(this, "RG", null, 1);
+        db = dbHelper.getWritableDatabase();
+        initNFCComponents();
+        adapter = new MarcaAdapter(this, marcas, R.layout.clv_row);
+        listView.setAdapter(adapter);
+        actualizarListView();
+
 
     }
 
@@ -328,6 +375,7 @@ public class LocalHomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_local_home);
         //Se elimina la versión anterior de la tabla
         //validarAccesos();
+        Log.i("INTENTS","RESUME");
         if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
             solicitarAccesos();
         }
