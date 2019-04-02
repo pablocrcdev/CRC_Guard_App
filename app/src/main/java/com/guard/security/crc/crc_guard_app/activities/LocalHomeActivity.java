@@ -146,12 +146,12 @@ public class LocalHomeActivity extends AppCompatActivity {
 
         if (cursor.getCount() <= 0) {
             //La base de datos está vacía.
-            RelativeLayout LocaHome = findViewById(R.id.LLNo_data);
+            LinearLayout LocaHome = findViewById(R.id.LLNo_data);
             LocaHome.setVisibility(View.VISIBLE);
             return list;
         }
         if (cursor.moveToFirst()) {
-            RelativeLayout LocaHome = findViewById(R.id.LLNo_data);
+            LinearLayout LocaHome = findViewById(R.id.LLNo_data);
             LocaHome.setVisibility(View.GONE);
             // iteramos sobre el cursor de resultados,
             // y vamos rellenando el array que posteriormente devolveremos
@@ -275,7 +275,7 @@ public class LocalHomeActivity extends AppCompatActivity {
                 Double.toString(gvGPS.obtenerLongitud()));
 
         registrarMarca(marca);
-        RelativeLayout LocaHome = findViewById(R.id.LLNo_data);
+        LinearLayout LocaHome = findViewById(R.id.LLNo_data);
         LocaHome.setVisibility(View.GONE);
         actualizarListView();
     }
