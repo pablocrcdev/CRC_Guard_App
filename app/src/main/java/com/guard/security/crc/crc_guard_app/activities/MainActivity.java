@@ -59,9 +59,9 @@ public class MainActivity extends AppCompatActivity {
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
     //IP Public ALFA
-    private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+    //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
     //Desa Externo
-    //private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
+    private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
     //IP Desa
     //private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560:1";
 

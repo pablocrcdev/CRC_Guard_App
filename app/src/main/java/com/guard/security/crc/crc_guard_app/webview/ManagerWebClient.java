@@ -12,6 +12,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.guard.security.crc.crc_guard_app.activities.LocalHomeActivity;
+import com.guard.security.crc.crc_guard_app.activities.MainActivity;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
 
 public class ManagerWebClient extends WebViewClient {
@@ -43,7 +44,6 @@ public class ManagerWebClient extends WebViewClient {
                 }
                 if (timeout) {
                     if (gvNfcAdapter != null) {
-                        Log.i("JOD", "Entrando en local");
                         Intent intent = new Intent(gvContext, LocalHomeActivity.class);
                         gvContext.startActivity(intent);
                     } else {
@@ -64,18 +64,24 @@ public class ManagerWebClient extends WebViewClient {
     // La funcion solo se ejecutara al determinar algun error al cargar el webview
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-        //
         if (gvNfcAdapter != null) {
-            Log.i("JOD", error.getDescription().toString());
             //ERR_CACHE_MISS
-            if(error.getDescription().toString().equals("ERR_CACHE_MISS")) {
+            if (error.getDescription().toString().equals("net::ERR_CACHE_MISS")) {
+                Intent intent = new Intent(gvContext, MainActivity.class);
+                gvContext.startActivity(intent);
+            }
+            if (error.getDescription().toString().equals("net::ERR_CONNECTION_ABORTED")) {
                 Intent intent = new Intent(gvContext, LocalHomeActivity.class);
                 gvContext.startActivity(intent);
             }
+            if (error.getDescription().toString().equals("net::ERR_INTERNET_DISCONNECTED")) {
+                Intent intent = new Intent(gvContext, LocalHomeActivity.class);
+                gvContext.startActivity(intent);
+            }
+
         } else {
             view.setVisibility(View.INVISIBLE);
             new ErrorController(gvContext).showErrorDialog();
         }
-
     }
 }
