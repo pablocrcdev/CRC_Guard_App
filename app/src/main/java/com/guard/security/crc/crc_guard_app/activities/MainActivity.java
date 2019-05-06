@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import android.app.AlarmManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -88,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
     private Uri gvCapturedImageURI = null;
     private ValueCallback<Uri[]> gvFilePathCallback;
     private String gvCameraPhotoPath;
+
+    private AlarmManager planificarAlarma;
 
     //********************************************************************************************//
     // Metodos de validacion
@@ -209,6 +212,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        planificarAlarma = (AlarmManager)getSystemService(ALARM_SERVICE);
+        Intent intentt = new Intent(getApplicationContext(), MainActivity.class);
+        PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, intentt, 0);
+        planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,10000, 1000, pi);
         //
         if (validarEstadoRed()) {
             {

@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
+import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -317,7 +318,6 @@ public class LocalHomeActivity extends AppCompatActivity {
                 gvMytag = pIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             }
         }
-        Log.i("INTENTS", "RESUMEhh");
         //Prueba
     }
 
@@ -334,7 +334,6 @@ public class LocalHomeActivity extends AppCompatActivity {
         if (gvNfcAdapter != null)
             gvNfcAdapter.enableForegroundDispatch(this, gvPendingIntent, gvWriteTagFilters, null);
 
-        Log.i("INTENTS", "RESUME");
     }
 
     @Override
@@ -343,7 +342,6 @@ public class LocalHomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_local_home);
         //Se elimina la versión anterior de la tabla
         //validarAccesos();
-        Log.i("INTENTS", "RESUMEgg");
         if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
             solicitarAccesos();
         }
@@ -364,5 +362,57 @@ public class LocalHomeActivity extends AppCompatActivity {
         // cerramos conexión base de datos antes de destruir el activity
         db.close();
         super.onDestroy();
+    }
+    //Parametros AsyncTask
+    //1 = Parametros
+    //2 = Progress
+    //3 = Result
+    private class GetUrlContentTask extends AsyncTask<String, Void, String> {
+        protected String doInBackground(String... urls) {
+            String Resultado;
+            try {
+
+                URL url;
+                url = new URL(urls[0]);
+                HttpURLConnection connection;
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoOutput(true);
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                connection.connect();
+                Resultado = "SI";
+
+                HttpURLConnection conn = null;
+
+                try {
+                    conn = (HttpURLConnection) url.openConnection();
+                    if( conn.getResponseCode() == HttpURLConnection.HTTP_OK ){
+                        InputStream is = conn.getInputStream();
+                    }else{
+                        InputStream err = conn.getErrorStream();
+                    }
+                    return "Done";
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if(conn != null) {
+                        conn.disconnect();
+                    }
+                }
+
+            } catch (
+                    Exception ex) {
+                Resultado = "NO";
+            }
+            return Resultado;
+        }
+
+        protected void onPostExecute(String result) {
+
+        }
+
     }
 }
