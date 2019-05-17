@@ -21,6 +21,7 @@ import com.guard.security.crc.crc_guard_app.webview.mWebClient;
 public class Sender extends BroadcastReceiver {
     private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:9999";
     private GPSRastreador gvGPS;
+    private int Llamadas = 0;
     @Override
     public void onReceive(final Context context, Intent intent) {
         WebView gv = new WebView(context);
@@ -29,15 +30,20 @@ public class Sender extends BroadcastReceiver {
         gv.addJavascriptInterface(new WebInterface(context, gvGPS), "Android");
         gv.loadUrl(mURL);
         gvGPS = new GPSRastreador(context);
+        Log.i("PRUEBA","INICIO");
         gv.setWebViewClient(new mWebClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                view.loadUrl("javascript:prueba('"+obtenerIdentificador(context)+"'" +
-                        ",'"+gvGPS.obtenerLatitud()+"'"+
-                        ",'"+gvGPS.obtenerLongitud()+"');");
+                if (Llamadas == 0) {
+                    view.loadUrl("javascript:prueba('" + obtenerIdentificador(context) + "'" +
+                            ",'" + gvGPS.obtenerLatitud() + "'" +
+                            ",'" + gvGPS.obtenerLongitud() + "');");
+                    Log.i("PRUEBA", "CREADO");
+                }
+                Llamadas +=1;
             }
         });
-        Log.i("PRUEBA","CREADO");
+
     }
     public String obtenerIdentificador(Context gvContext) {
         TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);
