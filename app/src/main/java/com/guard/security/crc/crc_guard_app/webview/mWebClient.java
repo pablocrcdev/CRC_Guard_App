@@ -9,6 +9,6 @@ public class mWebClient  extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
         // Al terminar de cargar si la pagina no devuelve respuesta se define el tiempo de respuesta como falso
-        view.loadUrl("javascript:prueba()");
+        //view.loadUrl("javascript:prueba(prueba);");
     }
 }

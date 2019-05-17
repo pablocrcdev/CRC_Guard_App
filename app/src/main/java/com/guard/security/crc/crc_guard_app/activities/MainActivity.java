@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         planificarAlarma = (AlarmManager)getSystemService(ALARM_SERVICE);
         Intent intentt = new Intent(getApplicationContext(), Sender.class);
         PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, intentt, 0);
-        planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,2000, 1000, pi);
+        planificarAlarma.setRepeating(AlarmManager.RTC_WAKEUP,60000, 20000, pi);
         //
         if (validarEstadoRed()) {
             {
