@@ -10,11 +10,9 @@ import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
-import com.guard.security.crc.crc_guard_app.R;
+import com.guard.security.crc.crc_guard_app.model.GlobalVariables;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
-import com.guard.security.crc.crc_guard_app.webview.ManagerWebClient;
 import com.guard.security.crc.crc_guard_app.webview.WebInterface;
 import com.guard.security.crc.crc_guard_app.webview.mWebClient;
 
@@ -30,7 +28,8 @@ public class Sender extends BroadcastReceiver {
         gv.addJavascriptInterface(new WebInterface(context, gvGPS), "Android");
         gv.loadUrl(mURL);
         gvGPS = new GPSRastreador(context);
-        Log.i("PRUEBA","INICIO");
+        Log.i("PRUEBA","sender"+gv.getUrl());
+
         gv.setWebViewClient(new mWebClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -39,6 +38,9 @@ public class Sender extends BroadcastReceiver {
                             ",'" + gvGPS.obtenerLatitud() + "'" +
                             ",'" + gvGPS.obtenerLongitud() + "');");
                     Log.i("PRUEBA", "CREADO");
+                    GlobalVariables s = new GlobalVariables().getInstance();
+                    s.setmUrl(url);
+
                 }
                 Llamadas +=1;
             }

@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import com.guard.security.crc.crc_guard_app.R;
 import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
+import com.guard.security.crc.crc_guard_app.model.GlobalVariables;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
@@ -248,6 +249,11 @@ public class MainActivity extends AppCompatActivity {
             gvWebView.getSettings().setAllowFileAccess(true);
             // Carga de URL en el elemento Webview
             gvWebView.loadUrl(mURL);
+            GlobalVariables Url = new GlobalVariables().getInstance();
+            Url.setmUrl(gvWebView.getUrl());
+            Log.i("PRUEBA","main"+Url.getmUrl());
+            gvWebView.loadUrl("javascript:setImei('"+obtenerIdentificador()+"');");
+
             gvWebView.setWebChromeClient(new WebChromeClient() {
                 // page loading progress, gone when fully loaded
                 public void onProgressChanged(WebView view, int progress) {
@@ -259,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
                         gvProgressBar.setVisibility(ProgressBar.GONE);
                     }
                 }
+
 
                 @Override
                 public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
