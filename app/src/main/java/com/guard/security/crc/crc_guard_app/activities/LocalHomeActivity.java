@@ -28,7 +28,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.guard.security.crc.crc_guard_app.R;
@@ -37,8 +36,7 @@ import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -355,6 +353,7 @@ public class LocalHomeActivity extends AppCompatActivity {
         adapter = new MarcaAdapter(this, marcas, R.layout.clv_row);
         listView.setAdapter(adapter);
         actualizarListView();
+        dbHelper.LimpiarDB(db);
     }
 
     @Override

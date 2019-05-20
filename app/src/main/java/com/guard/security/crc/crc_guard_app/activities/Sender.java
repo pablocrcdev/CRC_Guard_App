@@ -22,7 +22,7 @@ public class Sender extends BroadcastReceiver {
     private int Llamadas = 0;
     @Override
     public void onReceive(final Context context, Intent intent) {
-        WebView gv = new WebView(context);
+       /* WebView gv = new WebView(context);
         gv.setWebViewClient(new mWebClient());
         gv.getSettings().setJavaScriptEnabled(true);
         gv.addJavascriptInterface(new WebInterface(context, gvGPS), "Android");
@@ -38,14 +38,13 @@ public class Sender extends BroadcastReceiver {
                             ",'" + gvGPS.obtenerLatitud() + "'" +
                             ",'" + gvGPS.obtenerLongitud() + "');");
                     Log.i("PRUEBA", "CREADO");
-                    GlobalVariables s = new GlobalVariables().getInstance();
-                    s.setmUrl(url);
+                    //GlobalVariables s = new GlobalVariables().getInstance();
+                    //s.setmUrl(url);
 
                 }
                 Llamadas +=1;
             }
-        });
-
+        });*/
     }
     public String obtenerIdentificador(Context gvContext) {
         TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);

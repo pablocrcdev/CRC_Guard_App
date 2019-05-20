@@ -43,13 +43,6 @@ public class MarcaAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(layout, null);
             vh = new ViewHolder();
-            /*vh.numMarca =  convertView.findViewById(R.id.textViewNumMarca);
-            //vh.idDevice = (TextView) convertView.findViewById(R.id.textViewIdDevice);
-            //vh.nfcData = (TextView) convertView.findViewById(R.id.textViewNfcData);
-            vh.horaMarca =  convertView.findViewById(R.id.textViewHoraMarca);
-            //vh.latitud = (TextView) convertView.findViewById(R.id.textViewLatitud);
-            //vh.longitud = (TextView) convertView.findViewById(R.id.textViewLongitud);
-            vh.estado =  convertView.findViewById(R.id.textViewIndEstado);*/
             vh.estado =  convertView.findViewById(R.id.txtEstado);
             vh.horaMarca =  convertView.findViewById(R.id.txtTitulo_Hora);
             vh.numMarca = convertView.findViewById(R.id.txtTitulo_Marca);
@@ -59,15 +52,6 @@ public class MarcaAdapter extends BaseAdapter {
         }
 
         Marca currentMarca = list.get(position);
-        /*
-        vh.numMarca.setText(currentMarca.getDbId()+"");
-        //vh.idDevice.setText(currentMarca.getImei());
-        //vh.nfcData.setText(currentMarca.getNfcData());
-        vh.horaMarca.setText(currentMarca.getHoraMarca());
-        //vh.latitud.setText(currentMarca.getLat());
-        //vh.longitud.setText(currentMarca.getLng());
-        vh.estado.setText(currentMarca.getEstado());
-        */
         String Resultado_Estado;
         if (currentMarca.getEstado().contains("PRC")){
             Resultado_Estado = "Procesado.";

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionCode="2"
+    android:versionName="2.0"
     package="com.guard.security.crc.crc_guard_app">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -17,7 +19,6 @@
         android:required="true" />
 
     <application
-        android:name=".model.GlobalVariables"
         android:persistent="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

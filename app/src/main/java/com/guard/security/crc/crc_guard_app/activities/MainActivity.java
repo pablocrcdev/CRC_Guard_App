@@ -25,10 +25,12 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.ViewTreeObserver;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -50,13 +52,17 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import android.app.AlarmManager;
 
-public class MainActivity extends AppCompatActivity {
+
+
+
+public class MainActivity extends AppCompatActivity  {
 
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
@@ -78,7 +84,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean gvWriteMode;
     private Tag gvMytag;
     private Context gvContext;
-
+    private SwipeRefreshLayout mySwipeRefreshLayout;
+    private ViewTreeObserver.OnScrollChangedListener mOnScrollChangedListener;
     private int gvALL_PERMISSION = 0;
 
     // =================== Variables para permisos de android =================== //
@@ -92,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
     private String gvCameraPhotoPath;
 
     private AlarmManager planificarAlarma;
+
 
     //********************************************************************************************//
     // Metodos de validacion
@@ -213,10 +221,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        /*
         planificarAlarma = (AlarmManager)getSystemService(ALARM_SERVICE);
         Intent intentt = new Intent(getApplicationContext(), Sender.class);
         PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, intentt, 0);
-        planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,600000, 600000, pi);
+        planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,600000, 600000, pi);*/
         //
         if (validarEstadoRed()) {
             {
@@ -249,10 +258,34 @@ public class MainActivity extends AppCompatActivity {
             gvWebView.getSettings().setAllowFileAccess(true);
             // Carga de URL en el elemento Webview
             gvWebView.loadUrl(mURL);
-            GlobalVariables Url = new GlobalVariables().getInstance();
-            Url.setmUrl(gvWebView.getUrl());
-            Log.i("PRUEBA","main"+Url.getmUrl());
+           // GlobalVariables Url = new GlobalVariables().getInstance();
+            //Url.setmUrl(gvWebView.getUrl());
+            //Log.i("PRUEBA","main"+Url.getmUrl());
             gvWebView.loadUrl("javascript:setImei('"+obtenerIdentificador()+"');");
+            mySwipeRefreshLayout = this.findViewById(R.id.Swipe);
+            mySwipeRefreshLayout.getViewTreeObserver().addOnScrollChangedListener(mOnScrollChangedListener =
+                    new ViewTreeObserver.OnScrollChangedListener() {
+                        @Override
+                        public void onScrollChanged() {
+                            if (gvWebView.getScrollY() == 0)
+                                mySwipeRefreshLayout.setEnabled(true);
+                            else
+                                mySwipeRefreshLayout.setEnabled(false);
+
+                        }
+                    });
+            //La recarga tiene problemas de scroll
+
+            mySwipeRefreshLayout.setOnRefreshListener(
+                    new SwipeRefreshLayout.OnRefreshListener() {
+                        @Override
+                        public void onRefresh() {
+                            gvWebView.reload();
+                            //mySwipeRefreshLayout.getViewTreeObserver().removeOnScrollChangedListener(mOnScrollChangedListener);
+                            mySwipeRefreshLayout.setRefreshing(false);
+                        }
+                    }
+            );
 
             gvWebView.setWebChromeClient(new WebChromeClient() {
                 // page loading progress, gone when fully loaded
@@ -379,6 +412,7 @@ public class MainActivity extends AppCompatActivity {
             //Abrimos la base de datos 'DBTest1' en modo escritura
             dbhelper = new DatabaseHandler(this, "RG", null, 1);
             db = dbhelper.getWritableDatabase();
+            dbhelper.LimpiarDB(db);
             if (gvNfcAdapter != null) {
                 readFromIntent(getIntent());
 

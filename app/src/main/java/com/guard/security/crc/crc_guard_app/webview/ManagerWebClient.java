@@ -1,9 +1,14 @@
 package com.guard.security.crc.crc_guard_app.webview;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.nfc.NfcAdapter;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebResourceError;
@@ -11,12 +16,12 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.guard.security.crc.crc_guard_app.BuildConfig;
 import com.guard.security.crc.crc_guard_app.activities.LocalHomeActivity;
 import com.guard.security.crc.crc_guard_app.activities.MainActivity;
-import com.guard.security.crc.crc_guard_app.model.GlobalVariables;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
+import com.guard.security.crc.crc_guard_app.util.Procesos;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ManagerWebClient extends WebViewClient {
     //=============================VARIABLES GLOBALES=============================================//
@@ -63,10 +68,25 @@ public class ManagerWebClient extends WebViewClient {
     public void onPageFinished(WebView view, String url) {
         // Al terminar de cargar si la pagina no devuelve respuesta se define el tiempo de respuesta como falso
         timeout = false;
-        if (Reload == 0) {
-            view.loadUrl("javascript:setImei('"+  Reload +"');");
-            Reload = 1;
-            Log.i("PRUEBA","1");
+        Procesos P = new Procesos();
+        if (P.Num_Pagina(url).equals("1")) {
+            if (Reload == 0) {
+                view.loadUrl("javascript:setImei('" + obtenerIdentificador(this.gvContext) + "'" +
+                        ",'" + BuildConfig.VERSION_NAME + "');");
+                Reload = 1;
+            }
+        }
+    }
+
+
+    public String obtenerIdentificador(Context gvContext) {
+        TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(gvContext, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return telephonyManager.getImei();
+        } else {
+            return telephonyManager.getDeviceId();
         }
     }
 
@@ -74,10 +94,6 @@ public class ManagerWebClient extends WebViewClient {
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         if (gvNfcAdapter != null) {
-            GlobalVariables Url = GlobalVariables;
-            Url.setmUrl(view.getUrl());
-            Log.i("PRUEBA","Manager"+Url.getmUrl());
-            //ERR_CACHE_MISS
             if (error.getDescription().toString().equals("net::ERR_CACHE_MISS")) {
                 Intent intent = new Intent(gvContext, MainActivity.class);
                 gvContext.startActivity(intent);
