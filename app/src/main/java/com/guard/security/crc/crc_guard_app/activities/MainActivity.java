@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity  {
                 Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
             }
             // Seteo de Cliente Web, para manejo de navegador interno
-            gvWebView.setWebViewClient(new ManagerWebClient(this));
+            gvWebView.setWebViewClient(new ManagerWebClient(this,this));
             // Habilitacion de Javascript en el webview
             gvWebView.getSettings().setJavaScriptEnabled(true);
             // Inicializacion de interfaz de javascript entre webview y app android
@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity  {
            // GlobalVariables Url = new GlobalVariables().getInstance();
             //Url.setmUrl(gvWebView.getUrl());
             //Log.i("PRUEBA","main"+Url.getmUrl());
-            gvWebView.loadUrl("javascript:setImei('"+obtenerIdentificador()+"');");
+            //gvWebView.loadUrl("javascript:setImei('"+obtenerIdentificador()+"');");
             mySwipeRefreshLayout = this.findViewById(R.id.Swipe);
             mySwipeRefreshLayout.getViewTreeObserver().addOnScrollChangedListener(mOnScrollChangedListener =
                     new ViewTreeObserver.OnScrollChangedListener() {

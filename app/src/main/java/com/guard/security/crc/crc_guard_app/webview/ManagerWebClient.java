@@ -1,6 +1,7 @@
 package com.guard.security.crc.crc_guard_app.webview;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -29,12 +30,15 @@ public class ManagerWebClient extends WebViewClient {
     private Context gvContext;
     private NfcAdapter gvNfcAdapter;
     private int Reload = 0;
+    private int gvALL_PERMISSION = 0;
+    private Activity App;
 
     //============================================================================================//
     // El contructor se define con el parametro de contexto para refenrenciar siempre al activity
     // que este en primer plano y poder aplicar funciones sobre el mismo
-    public ManagerWebClient(Context pcontext) {
+    public ManagerWebClient(Context pcontext, Activity app) {
         this.gvContext = pcontext;
+        this.App = app;
         timeout = true;
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(gvContext);
     }
@@ -71,8 +75,9 @@ public class ManagerWebClient extends WebViewClient {
         Procesos P = new Procesos();
         if (P.Num_Pagina(url).equals("1")) {
             if (Reload == 0) {
-                view.loadUrl("javascript:setImei('" + obtenerIdentificador(this.gvContext) + "'" +
+                view.loadUrl("javascript:setImei('" + obtenerIdentificador2(this.gvContext) + "'" +
                         ",'" + BuildConfig.VERSION_NAME + "');");
+                Log.i("PRUEBA","SETEAOD");
                 Reload = 1;
             }
         }
@@ -89,6 +94,22 @@ public class ManagerWebClient extends WebViewClient {
             return telephonyManager.getDeviceId();
         }
     }
+
+    public String obtenerIdentificador2(Context gvContext) {
+        TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(gvContext, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        }
+
+        ActivityCompat.requestPermissions(App, new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.READ_PHONE_STATE}, gvALL_PERMISSION);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return telephonyManager.getImei();
+        } else {
+            return telephonyManager.getDeviceId();
+        }
+    }
+
 
     // La funcion solo se ejecutara al determinar algun error al cargar el webview
     @Override
