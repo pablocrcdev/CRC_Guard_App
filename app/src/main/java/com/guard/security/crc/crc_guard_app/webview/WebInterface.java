@@ -14,6 +14,7 @@ import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 //import com.google.gson.Gson;
+import com.guard.security.crc.crc_guard_app.BuildConfig;
 import com.guard.security.crc.crc_guard_app.activities.MainActivity;
 import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
@@ -97,9 +98,13 @@ public class WebInterface {
     }
     @JavascriptInterface
     public String getImei(){
-        ArrayList<String> Imei =new ArrayList<>();
+        ArrayList<String> Imei = new ArrayList<>();
         Imei.add(obtenerIdentificador2(this.gvContext));
         return getJSONImei(Imei);
+    }
+    @JavascriptInterface
+    public String getAppVersion(){
+        return BuildConfig.VERSION_NAME;
     }
 
     public String obtenerIdentificador2(Context gvContext) {
@@ -142,12 +147,6 @@ public class WebInterface {
     }
 
     private String getJSON(ArrayList<Marca> list) {
-        /*Gson gson = new Gson();
-        StringBuilder sb = new StringBuilder();
-        for(Marca d : list) {
-            sb.append(gson.toJson(d));
-        }
-        return sb.toString();*/
         JSONObject listJSON = new JSONObject();
         JSONObject obj = null;
         JSONArray jsonArray = new JSONArray();
@@ -171,8 +170,6 @@ public class WebInterface {
             e.printStackTrace();
         }
         return listJSON.toString();
-
-
     }
 
     private String obtenerIdentificador() {

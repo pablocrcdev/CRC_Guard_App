@@ -101,6 +101,7 @@ public class ManagerWebClient extends WebViewClient {
     }
 
     public String obtenerIdentificador2(Context gvContext) {
+        return "357626090998635";/*
         TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(gvContext, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
         }
@@ -112,7 +113,7 @@ public class ManagerWebClient extends WebViewClient {
             return telephonyManager.getImei();
         } else {
             return telephonyManager.getDeviceId();
-        }
+        }*/
     }
 
 
