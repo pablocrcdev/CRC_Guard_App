@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity  {
             // Habilitacion de Javascript en el webview
             gvWebView.getSettings().setJavaScriptEnabled(true);
             // Inicializacion de interfaz de javascript entre webview y app android
-            gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS), "Android");
+            gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS, this), "Android");
             // Permite el acceso a documentos
             gvWebView.getSettings().setAllowFileAccess(true);
             // Carga de URL en el elemento Webview

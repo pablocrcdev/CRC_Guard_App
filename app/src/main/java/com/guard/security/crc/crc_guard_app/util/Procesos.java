@@ -7,7 +7,7 @@ public class Procesos {
         String Resultado = "";
         try {
             String[] UrlS = url.split("=");
-            for (int i = 1; i < UrlS.length; i++) {
+            for (int i = 1; i < 2; i++) {
                 String[] Procesado = UrlS[i].split(":");
                 for (int p = 1; p < 2; p++) {
                     Resultado = Procesado[i];

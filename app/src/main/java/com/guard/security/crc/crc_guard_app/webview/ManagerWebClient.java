@@ -73,13 +73,18 @@ public class ManagerWebClient extends WebViewClient {
         // Al terminar de cargar si la pagina no devuelve respuesta se define el tiempo de respuesta como falso
         timeout = false;
         Procesos P = new Procesos();
+        Log.i("PRUEBA",url);
         if (P.Num_Pagina(url).equals("1")) {
             if (Reload == 0) {
                 view.loadUrl("javascript:setImei('" + obtenerIdentificador2(this.gvContext) + "'" +
                         ",'" + BuildConfig.VERSION_NAME + "');");
-                Log.i("PRUEBA","SETEAOD");
+               // Log.i("PRUEBA","SETEADO:  "+obtenerIdentificador2(this.gvContext));
+                //Se pone en 1 para evitar que haga multiples llamados al javascript
                 Reload = 1;
             }
+        }else{
+            //Cada vez que sale de la pagina 1 resetea el valor
+            Reload = 0;
         }
     }
 

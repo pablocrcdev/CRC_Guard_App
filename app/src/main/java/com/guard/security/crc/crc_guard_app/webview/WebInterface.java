@@ -1,6 +1,7 @@
 package com.guard.security.crc.crc_guard_app.webview;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -27,14 +28,16 @@ import java.util.List;
 
 public class WebInterface {
     private Context gvContext;
+    private Activity App;
     private GPSRastreador gvGPS;
     private SQLiteDatabase db;
     private DatabaseHandler dbhelper;
 
     //Constructor de la clase que solo recibe el contexto de la apicacion
-    public WebInterface(Context pContext, GPSRastreador pGps){//, String pIdDevice) {
+    public WebInterface(Context pContext, GPSRastreador pGps, Activity app){//, String pIdDevice) {
         this.gvContext = pContext;
         this.gvGPS = pGps;
+        this.App = app;
     }
 
     @JavascriptInterface
@@ -91,6 +94,51 @@ public class WebInterface {
     @JavascriptInterface
     public String getMarks(){
         return getJSON((ArrayList<Marca>) obtenerMarcas());
+    }
+    @JavascriptInterface
+    public String getImei(){
+        ArrayList<String> Imei =new ArrayList<>();
+        Imei.add(obtenerIdentificador2(this.gvContext));
+        return getJSONImei(Imei);
+    }
+
+    public String obtenerIdentificador2(Context gvContext) {
+        TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(gvContext, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        }
+
+        ActivityCompat.requestPermissions(App, new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.READ_PHONE_STATE}, 0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return telephonyManager.getImei();
+        } else {
+            return telephonyManager.getDeviceId();
+        }
+    }
+
+    private String getJSONImei(ArrayList<String> list) {
+        JSONObject listJSON = new JSONObject();
+        JSONObject obj = null;
+        JSONArray jsonArray = new JSONArray();
+        for (String Imei : list) {
+            obj = new JSONObject();
+            try {
+                obj.put("Imei",Imei);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            jsonArray.put(obj);
+        }
+        try {
+            listJSON.put("Imei",jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return listJSON.toString();
+
+
     }
 
     private String getJSON(ArrayList<Marca> list) {
