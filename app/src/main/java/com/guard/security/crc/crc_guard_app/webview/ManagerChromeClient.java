@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.webkit.DownloadListener;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -165,4 +166,5 @@ public class ManagerChromeClient extends WebChromeClient {
     public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
         openFileChooser(uploadMsg, acceptType);
     }
+
 }

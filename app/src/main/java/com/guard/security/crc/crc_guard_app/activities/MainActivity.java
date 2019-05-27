@@ -2,6 +2,7 @@ package com.guard.security.crc.crc_guard_app.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
@@ -31,6 +32,9 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.ViewTreeObserver;
+import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
+import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -57,17 +61,17 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import android.app.AlarmManager;
 
 
-
-
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity {
 
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
     //IP Public ALFA
     private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+    //private String mURL =  "https://androidfilehost.com/?fid=3556969557455276147";
     //Desa Externo
     //private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
     //IP Desa
@@ -249,19 +253,34 @@ public class MainActivity extends AppCompatActivity  {
                 Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
             }
             // Seteo de Cliente Web, para manejo de navegador interno
-            gvWebView.setWebViewClient(new ManagerWebClient(this,this));
+            gvWebView.setWebViewClient(new ManagerWebClient(this, this,gvWebView));
             // Habilitacion de Javascript en el webview
             gvWebView.getSettings().setJavaScriptEnabled(true);
+            gvWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
             // Inicializacion de interfaz de javascript entre webview y app android
             gvWebView.addJavascriptInterface(new WebInterface(MainActivity.this, gvGPS, this), "Android");
             // Permite el acceso a documentos
             gvWebView.getSettings().setAllowFileAccess(true);
             // Carga de URL en el elemento Webview
             gvWebView.loadUrl(mURL);
-           // GlobalVariables Url = new GlobalVariables().getInstance();
+            // GlobalVariables Url = new GlobalVariables().getInstance();
             //Url.setmUrl(gvWebView.getUrl());
             //Log.i("PRUEBA","main"+Url.getmUrl());
             //gvWebView.loadUrl("javascript:setImei('"+obtenerIdentificador()+"');");
+            /*gvWebView.setDownloadListener(new DownloadListener() {
+                public void onDownloadStart(String url, String userAgent,
+                                            String contentDisposition, String mimetype,
+                                            long contentLength) {
+
+                    Uri uri = Uri.parse(url);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                }
+            });*/
+
+
+
+
             mySwipeRefreshLayout = this.findViewById(R.id.Swipe);
             mySwipeRefreshLayout.getViewTreeObserver().addOnScrollChangedListener(mOnScrollChangedListener =
                     new ViewTreeObserver.OnScrollChangedListener() {

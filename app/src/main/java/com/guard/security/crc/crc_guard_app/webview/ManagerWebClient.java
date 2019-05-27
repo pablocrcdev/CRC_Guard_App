@@ -2,20 +2,25 @@ package com.guard.security.crc.crc_guard_app.webview;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.nfc.NfcAdapter;
-import android.os.Build;
-import android.support.v4.app.ActivityCompat;
-import android.telephony.TelephonyManager;
+import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
+import android.webkit.URLUtil;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import com.guard.security.crc.crc_guard_app.BuildConfig;
 import com.guard.security.crc.crc_guard_app.activities.LocalHomeActivity;
@@ -23,24 +28,28 @@ import com.guard.security.crc.crc_guard_app.activities.MainActivity;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
 import com.guard.security.crc.crc_guard_app.util.Procesos;
 
+import static android.content.Context.DOWNLOAD_SERVICE;
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
-public class ManagerWebClient extends WebViewClient {
+
+public class ManagerWebClient extends WebViewClient implements DownloadListener {
     //=============================VARIABLES GLOBALES=============================================//
     boolean timeout;
     private Context gvContext;
     private NfcAdapter gvNfcAdapter;
     private int Reload = 0;
-    private int gvALL_PERMISSION = 0;
     private Activity App;
+    private android.webkit.WebView Wv;
 
     //============================================================================================//
     // El contructor se define con el parametro de contexto para refenrenciar siempre al activity
     // que este en primer plano y poder aplicar funciones sobre el mismo
-    public ManagerWebClient(Context pcontext, Activity app) {
+    public ManagerWebClient(Context pcontext, Activity app, WebView wv) {
         this.gvContext = pcontext;
         this.App = app;
         timeout = true;
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(gvContext);
+        this.Wv = wv;
     }
 
     @Override
@@ -73,7 +82,6 @@ public class ManagerWebClient extends WebViewClient {
         // Al terminar de cargar si la pagina no devuelve respuesta se define el tiempo de respuesta como falso
         timeout = false;
         Procesos P = new Procesos();
-        Log.i("PRUEBA",url);
         if (P.Num_Pagina(url).equals("1")) {
             if (Reload == 0) {
                 view.loadUrl("javascript:setImei('" + obtenerIdentificador2(this.gvContext) + "'" +
@@ -88,17 +96,6 @@ public class ManagerWebClient extends WebViewClient {
         }
     }
 
-
-    public String obtenerIdentificador(Context gvContext) {
-        TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);
-        if (ActivityCompat.checkSelfPermission(gvContext, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return telephonyManager.getImei();
-        } else {
-            return telephonyManager.getDeviceId();
-        }
-    }
 
     public String obtenerIdentificador2(Context gvContext) {
         return "357626090998635";/*
@@ -139,4 +136,63 @@ public class ManagerWebClient extends WebViewClient {
             new ErrorController(gvContext).showErrorDialog();
         }
     }
+    @Override
+    public boolean shouldOverrideUrlLoading(WebView v, String u) {
+        v.loadUrl(u);
+        if(ContextCompat.checkSelfPermission(this.gvContext,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        }else{
+        }
+
+
+        v.setDownloadListener(this);
+
+
+       /* v.setDownloadListener(new DownloadListener() {
+
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long contentLength) {
+                Log.i("PRUEBA","3");
+                Uri uri = Uri.parse(url);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            }
+
+        });*/
+        //Log.i("PRUEBA","1"+u);
+        return true;
+    }
+
+    @Override
+    public void onDownloadStart(String url, String userAgent,
+                                String contentDisposition, String mimeType,
+                                long contentLength) {
+        DownloadManager.Request request = new DownloadManager.Request(
+                Uri.parse(url));
+
+        request.setMimeType("application/vnd.android.package-archive");
+
+        String cookies = CookieManager.getInstance().getCookie(url);
+
+        request.addRequestHeader("cookie", cookies);
+
+        request.addRequestHeader("User-Agent", userAgent);
+
+        request.setDescription("Descargando Actualización...");
+
+       // request.setTitle(URLUtil.guessFileName(url, contentDisposition,
+         //       mimeType));
+
+        request.allowScanningByMediaScanner();
+
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        //request.setDestinationInExternalFilesDir(this.gvContext,
+          //      DIRECTORY_DOWNLOADS,DIRECTORY_DOWNLOADS);
+        //request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, android.webkit.URLUtil.guessFileName(url, contentDisposition, "application/vnd.android.package-archive"));
+        DownloadManager dm = (DownloadManager) gvContext.getSystemService(DOWNLOAD_SERVICE);
+        dm.enqueue(request);
+        Toast.makeText(this.App, "Descargando Actualización",
+                Toast.LENGTH_LONG).show();
+    }
+
+
 }

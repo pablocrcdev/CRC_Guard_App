@@ -98,9 +98,11 @@ public class WebInterface {
     }
     @JavascriptInterface
     public String getImei(){
+        return null;
+        /*
         ArrayList<String> Imei = new ArrayList<>();
         Imei.add(obtenerIdentificador2(this.gvContext));
-        return getJSONImei(Imei);
+        return getJSONImei(Imei);*/
     }
     @JavascriptInterface
     public String getAppVersion(){
