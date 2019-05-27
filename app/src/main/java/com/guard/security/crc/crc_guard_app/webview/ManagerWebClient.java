@@ -9,13 +9,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
-import android.os.Environment;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
-import android.webkit.URLUtil;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -40,16 +40,18 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
     private int Reload = 0;
     private Activity App;
     private android.webkit.WebView Wv;
+    private MainActivity Main;
 
     //============================================================================================//
     // El contructor se define con el parametro de contexto para refenrenciar siempre al activity
     // que este en primer plano y poder aplicar funciones sobre el mismo
-    public ManagerWebClient(Context pcontext, Activity app, WebView wv) {
+    public ManagerWebClient(Context pcontext, Activity app, WebView wv, MainActivity main) {
         this.gvContext = pcontext;
         this.App = app;
         timeout = true;
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(gvContext);
         this.Wv = wv;
+        this.Main = main;
     }
 
     @Override
@@ -86,11 +88,10 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
             if (Reload == 0) {
                 view.loadUrl("javascript:setImei('" + obtenerIdentificador2(this.gvContext) + "'" +
                         ",'" + BuildConfig.VERSION_NAME + "');");
-               // Log.i("PRUEBA","SETEADO:  "+obtenerIdentificador2(this.gvContext));
                 //Se pone en 1 para evitar que haga multiples llamados al javascript
                 Reload = 1;
             }
-        }else{
+        } else {
             //Cada vez que sale de la pagina 1 resetea el valor
             Reload = 0;
         }
@@ -98,21 +99,19 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
 
 
     public String obtenerIdentificador2(Context gvContext) {
-        return "357626090998635";/*
         TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(gvContext, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
         }
 
         ActivityCompat.requestPermissions(App, new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE}, gvALL_PERMISSION);
+                Manifest.permission.READ_PHONE_STATE}, 0);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return telephonyManager.getImei();
         } else {
             return telephonyManager.getDeviceId();
-        }*/
+        }
     }
-
 
     // La funcion solo se ejecutara al determinar algun error al cargar el webview
     @Override
@@ -130,35 +129,24 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
                 Intent intent = new Intent(gvContext, LocalHomeActivity.class);
                 gvContext.startActivity(intent);
             }
+            if (error.getDescription().toString().equals("net::ERR_CONNECTION_REFUSED")) {
+                Intent intent = new Intent(gvContext, LocalHomeActivity.class);
+                gvContext.startActivity(intent);
+            }
 
         } else {
             view.setVisibility(View.INVISIBLE);
             new ErrorController(gvContext).showErrorDialog();
         }
     }
+
     @Override
     public boolean shouldOverrideUrlLoading(WebView v, String u) {
         v.loadUrl(u);
-        if(ContextCompat.checkSelfPermission(this.gvContext,
+        if (ContextCompat.checkSelfPermission(this.gvContext,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-        }else{
         }
-
-
         v.setDownloadListener(this);
-
-
-       /* v.setDownloadListener(new DownloadListener() {
-
-            @Override
-            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long contentLength) {
-                Log.i("PRUEBA","3");
-                Uri uri = Uri.parse(url);
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            }
-
-        });*/
-        //Log.i("PRUEBA","1"+u);
         return true;
     }
 
@@ -168,8 +156,26 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
                                 long contentLength) {
         DownloadManager.Request request = new DownloadManager.Request(
                 Uri.parse(url));
+        String[] Nombre = contentDisposition.split(";");
+        String FNombre = "";
+        for (int i = 0; i < Nombre.length; i++) {
+            if (Nombre[i].contains("=")) {
 
-        request.setMimeType("application/vnd.android.package-archive");
+                String[] File = Nombre[i].split("=");
+                for (int f = 0; f < File.length; f++) {
+
+                    if (!File[f].contains("filename")) {
+                        FNombre = File[f].replace("\"", "");
+                        break;
+                    }
+                }
+            }
+            if (FNombre != "") {
+                break;
+            }
+        }
+        mimeType = "application/vnd.android.package-archive";
+        request.setMimeType(mimeType);
 
         String cookies = CookieManager.getInstance().getCookie(url);
 
@@ -179,20 +185,13 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
 
         request.setDescription("Descargando Actualización...");
 
-       // request.setTitle(URLUtil.guessFileName(url, contentDisposition,
-         //       mimeType));
-
+        request.setTitle(FNombre);
         request.allowScanningByMediaScanner();
-
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        //request.setDestinationInExternalFilesDir(this.gvContext,
-          //      DIRECTORY_DOWNLOADS,DIRECTORY_DOWNLOADS);
-        //request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, android.webkit.URLUtil.guessFileName(url, contentDisposition, "application/vnd.android.package-archive"));
+        request.setDestinationInExternalFilesDir(gvContext, DIRECTORY_DOWNLOADS, FNombre);
         DownloadManager dm = (DownloadManager) gvContext.getSystemService(DOWNLOAD_SERVICE);
         dm.enqueue(request);
         Toast.makeText(this.App, "Descargando Actualización",
                 Toast.LENGTH_LONG).show();
     }
-
-
 }

@@ -64,13 +64,17 @@ import java.util.concurrent.TimeoutException;
 
 import android.app.AlarmManager;
 
+import static android.support.v4.content.ContextCompat.startActivity;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
     //IP Public ALFA
-    private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+    //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+
+    private String mURL = "http://10.1.1.12:9090/crccoding/f?p=2560:1";
     //private String mURL =  "https://androidfilehost.com/?fid=3556969557455276147";
     //Desa Externo
     //private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
@@ -253,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
             }
             // Seteo de Cliente Web, para manejo de navegador interno
-            gvWebView.setWebViewClient(new ManagerWebClient(this, this,gvWebView));
+            gvWebView.setWebViewClient(new ManagerWebClient(this, this,gvWebView,this));
             // Habilitacion de Javascript en el webview
             gvWebView.getSettings().setJavaScriptEnabled(true);
             gvWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
@@ -450,6 +454,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
 
     @Override
     protected void onDestroy() {
