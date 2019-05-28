@@ -60,6 +60,7 @@ public class WebInterface {
         } else {
             gvGPS.mostrarAlertaConfiguracion();
             return "";
+
         }
     }
 
@@ -96,6 +97,8 @@ public class WebInterface {
     public String getMarks(){
         return getJSON((ArrayList<Marca>) obtenerMarcas());
     }
+
+
     @JavascriptInterface
     public String getImei(){
         ArrayList<String> Imei = new ArrayList<>();

@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.Build;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
@@ -29,7 +30,9 @@ import com.guard.security.crc.crc_guard_app.util.ErrorController;
 import com.guard.security.crc.crc_guard_app.util.Procesos;
 
 import static android.content.Context.DOWNLOAD_SERVICE;
+import static android.os.Environment.DIRECTORY_DCIM;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
+import static android.os.Environment.getExternalStorageDirectory;
 
 
 public class ManagerWebClient extends WebViewClient implements DownloadListener {
@@ -82,18 +85,22 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
     @Override
     public void onPageFinished(WebView view, String url) {
         // Al terminar de cargar si la pagina no devuelve respuesta se define el tiempo de respuesta como falso
-        timeout = false;
-        Procesos P = new Procesos();
-        if (P.Num_Pagina(url).equals("1")) {
-            if (Reload == 0) {
-                view.loadUrl("javascript:setImei('" + obtenerIdentificador2(this.gvContext) + "'" +
-                        ",'" + BuildConfig.VERSION_NAME + "');");
-                //Se pone en 1 para evitar que haga multiples llamados al javascript
-                Reload = 1;
+        try {
+            timeout = false;
+            Procesos P = new Procesos();
+            if (P.Num_Pagina(url).equals("1")) {
+                if (Reload == 0) {
+                    view.loadUrl("javascript:setImei('" + obtenerIdentificador2(this.gvContext) + "'" +
+                            ",'" + BuildConfig.VERSION_NAME + "');");
+                    //Se pone en 1 para evitar que haga multiples llamados al javascript
+                    Reload = 1;
+                }
+            } else {
+                //Cada vez que sale de la pagina 1 resetea el valor
+                Reload = 0;
             }
-        } else {
-            //Cada vez que sale de la pagina 1 resetea el valor
-            Reload = 0;
+        }catch(Exception ex){
+
         }
     }
 
@@ -154,6 +161,8 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
     public void onDownloadStart(String url, String userAgent,
                                 String contentDisposition, String mimeType,
                                 long contentLength) {
+
+
         DownloadManager.Request request = new DownloadManager.Request(
                 Uri.parse(url));
         String[] Nombre = contentDisposition.split(";");
@@ -188,8 +197,11 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
         request.setTitle(FNombre);
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationInExternalFilesDir(gvContext, DIRECTORY_DOWNLOADS, FNombre);
-        DownloadManager dm = (DownloadManager) gvContext.getSystemService(DOWNLOAD_SERVICE);
+        //request.setDestinationInExternalFilesDir(gvContext,DIRECTORY_DOWNLOADS,FNombre);
+
+        request.setDestinationInExternalPublicDir("/"+DIRECTORY_DOWNLOADS,FNombre);
+       // request.setDestinationUri(Uri.parse(DIRECTORY_DOWNLOADS));
+        DownloadManager dm = (DownloadManager) App.getSystemService(DOWNLOAD_SERVICE);
         dm.enqueue(request);
         Toast.makeText(this.App, "Descargando Actualización",
                 Toast.LENGTH_LONG).show();

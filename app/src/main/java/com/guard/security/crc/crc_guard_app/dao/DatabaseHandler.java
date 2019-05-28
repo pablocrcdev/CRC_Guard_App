@@ -1,6 +1,7 @@
 package com.guard.security.crc.crc_guard_app.dao;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -31,10 +32,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 "hora_marca datetime," +
                 "latitud text," +
                 "longitud text," +
-                "num_serial text,"+
+                "num_serial text," +
                 "ind_estado text default \"PEN\")");
         //
-        sqLiteDatabase.execSQL("create table tbl_url (" + "Url text," + "fecha text" + ")");
+        sqLiteDatabase.execSQL("create table tbl_url (" + "SEC integer," + "Url text" + ")");
     }
 
     @Override
@@ -46,14 +47,26 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         create_DB(db);
 
     }
-    public void LimpiarDB(SQLiteDatabase db){
+
+    public void LimpiarDB(SQLiteDatabase db) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MONTH, -1);
         Date date = calendar.getTime();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         String Fecha = dateFormat.format(date);
 
-        db.execSQL("DELETE FROM marca_reloj WHERE ind_estado = 'PRC'  AND hora_marca <= '"+Fecha+"'");
+        db.execSQL("DELETE FROM marca_reloj WHERE ind_estado = 'PRC'  AND hora_marca <= '" + Fecha + "'");
+    }
+    public void Insertar_Act_Url(SQLiteDatabase db, String url){
+       /* String query="SELECT * from tbl_url";
+        Cursor cursor= db.rawQuery(query,null);
+        //Sec = 1 porque solo se usará una unica URL
+        if (cursor.getCount() > 0){
+            db.execSQL("UPDATE tbl_url set Url'"+url+"' where SEC='1'");
+        }else{
+            db.execSQL("INSERT INTO tbl_url ");
+        }*/
+       String Query = "SELECT OR REPLACE tbl_url (SEC,URL) VALUES(1,'"+url+"'";
     }
 
 }

@@ -56,7 +56,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -156,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         return vResult == PackageManager.PERMISSION_GRANTED;
     }
 
-    protected void solicitarAccesos() {
+    public void solicitarAccesos() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
                 ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_PHONE_STATE)) {
             //Codigo extra para el manejo de peticiones de permiso, en esta parte se colocan
@@ -165,6 +164,16 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.READ_PHONE_STATE}, gvALL_PERMISSION);
+
+    }
+
+    protected void solicitarStorage() {
+        int check = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (check == PackageManager.PERMISSION_GRANTED) {
+            //Do something
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1024);
+        }
     }
 
     public String obtenerIdentificador() {
@@ -229,6 +238,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        solicitarStorage();
+        solicitarAccesos();
         /*
         planificarAlarma = (AlarmManager)getSystemService(ALARM_SERVICE);
         Intent intentt = new Intent(getApplicationContext(), Sender.class);
@@ -236,10 +247,9 @@ public class MainActivity extends AppCompatActivity {
         planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,600000, 600000, pi);*/
         //
         if (validarEstadoRed()) {
-            {
-                if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
-                    solicitarAccesos();
-                }
+
+            if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
+                solicitarAccesos();
             }
             if (!hasPermissions(MainActivity.this, gvPERMISSIONS)) {
                 ActivityCompat.requestPermissions(MainActivity.this, gvPERMISSIONS, gvPERMISSION_ALL);
@@ -257,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
             }
             // Seteo de Cliente Web, para manejo de navegador interno
-            gvWebView.setWebViewClient(new ManagerWebClient(this, this,gvWebView,this));
+            gvWebView.setWebViewClient(new ManagerWebClient(this, this, gvWebView, this));
             // Habilitacion de Javascript en el webview
             gvWebView.getSettings().setJavaScriptEnabled(true);
             gvWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
@@ -281,8 +291,6 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
             });*/
-
-
 
 
             mySwipeRefreshLayout = this.findViewById(R.id.Swipe);

@@ -1,6 +1,7 @@
 package com.guard.security.crc.crc_guard_app.activities;
 
 import android.Manifest;
+import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.webkit.WebView;
 
 import com.guard.security.crc.crc_guard_app.model.GlobalVariables;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
+import com.guard.security.crc.crc_guard_app.util.Global;
 import com.guard.security.crc.crc_guard_app.webview.WebInterface;
 import com.guard.security.crc.crc_guard_app.webview.mWebClient;
 

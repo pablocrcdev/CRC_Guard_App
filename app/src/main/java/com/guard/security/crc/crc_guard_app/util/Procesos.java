@@ -3,6 +3,7 @@ package com.guard.security.crc.crc_guard_app.util;
 import android.util.Log;
 
 public class Procesos {
+
     public String Num_Pagina(String url) {
         String Resultado = "";
         try {
