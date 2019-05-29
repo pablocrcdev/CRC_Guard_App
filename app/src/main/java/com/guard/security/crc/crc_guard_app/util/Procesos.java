@@ -15,7 +15,17 @@ public class Procesos {
                 }
             }
         } catch (Exception io) {
-            Log.e("PRUEBA", io.toString() + "URL" + url);
+        }
+        return Resultado;
+    }
+
+    public String Obt_sesion__URL(String Url) {
+        String[] url = Url.split("=");
+        String Resultado = "";
+        for (int i = 1; i < url.length; i++) {
+            String[] Params = url[i].split(":");
+            Resultado = Params[2];
+            break;
         }
         return Resultado;
     }

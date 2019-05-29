@@ -6,14 +6,15 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.Build;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
@@ -23,16 +24,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.guard.security.crc.crc_guard_app.BuildConfig;
 import com.guard.security.crc.crc_guard_app.activities.LocalHomeActivity;
 import com.guard.security.crc.crc_guard_app.activities.MainActivity;
+import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
 import com.guard.security.crc.crc_guard_app.util.Procesos;
 
 import static android.content.Context.DOWNLOAD_SERVICE;
-import static android.os.Environment.DIRECTORY_DCIM;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
-import static android.os.Environment.getExternalStorageDirectory;
 
 
 public class ManagerWebClient extends WebViewClient implements DownloadListener {
@@ -44,17 +43,20 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
     private Activity App;
     private android.webkit.WebView Wv;
     private MainActivity Main;
+    private DatabaseHandler DBH;
+    private SQLiteDatabase DB;
 
     //============================================================================================//
     // El contructor se define con el parametro de contexto para refenrenciar siempre al activity
     // que este en primer plano y poder aplicar funciones sobre el mismo
-    public ManagerWebClient(Context pcontext, Activity app, WebView wv, MainActivity main) {
+    public ManagerWebClient(Context pcontext, Activity app, WebView wv, MainActivity main, DatabaseHandler dbh, SQLiteDatabase db) {
         this.gvContext = pcontext;
         this.App = app;
         timeout = true;
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(gvContext);
         this.Wv = wv;
         this.Main = main;
+        this.DBH = dbh;
     }
 
     @Override
@@ -84,7 +86,10 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
 
     @Override
     public void onPageFinished(WebView view, String url) {
+        timeout = false;
+        Log.i("SQLL",url);
         // Al terminar de cargar si la pagina no devuelve respuesta se define el tiempo de respuesta como falso
+        /*
         try {
             timeout = false;
             Procesos P = new Procesos();
@@ -92,6 +97,9 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
                 if (Reload == 0) {
                     view.loadUrl("javascript:setImei('" + obtenerIdentificador2(this.gvContext) + "'" +
                             ",'" + BuildConfig.VERSION_NAME + "');");
+                    DBH.Insertar_Act_Url(url);
+                    Procesos p = new Procesos();
+                    p.Obt_sesion__URL(url);
                     //Se pone en 1 para evitar que haga multiples llamados al javascript
                     Reload = 1;
                 }
@@ -101,24 +109,10 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
             }
         }catch(Exception ex){
 
-        }
+        }*/
+
     }
 
-
-    public String obtenerIdentificador2(Context gvContext) {
-        TelephonyManager telephonyManager = (TelephonyManager) gvContext.getSystemService(Context.TELEPHONY_SERVICE);
-        if (ActivityCompat.checkSelfPermission(gvContext, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-        }
-
-        ActivityCompat.requestPermissions(App, new String[]{
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE}, 0);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return telephonyManager.getImei();
-        } else {
-            return telephonyManager.getDeviceId();
-        }
-    }
 
     // La funcion solo se ejecutara al determinar algun error al cargar el webview
     @Override
@@ -128,6 +122,12 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
                 Intent intent = new Intent(gvContext, MainActivity.class);
                 gvContext.startActivity(intent);
             }
+            //Posibles erroes:
+            /*
+            "net::ERR_CONNECTION_REFUSED"
+            "net::ERR_INTERNET_DISCONNECTED"
+            "net::ERR_CONNECTION_ABORTED"
+             */
             if (error.getDescription().toString().equals("net::ERR_CONNECTION_ABORTED")) {
                 Intent intent = new Intent(gvContext, LocalHomeActivity.class);
                 gvContext.startActivity(intent);
@@ -165,6 +165,8 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
 
         DownloadManager.Request request = new DownloadManager.Request(
                 Uri.parse(url));
+        //Se procesa el contenido para buscar el nombre completo de la aplicacion
+        //Ya que si se hace con URLUtil.guessFileName() se obtiene un nombre como "f.apk" o "f.bin"
         String[] Nombre = contentDisposition.split(";");
         String FNombre = "";
         for (int i = 0; i < Nombre.length; i++) {
@@ -183,6 +185,7 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
                 break;
             }
         }
+
         mimeType = "application/vnd.android.package-archive";
         request.setMimeType(mimeType);
 
@@ -197,10 +200,8 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
         request.setTitle(FNombre);
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        //request.setDestinationInExternalFilesDir(gvContext,DIRECTORY_DOWNLOADS,FNombre);
 
-        request.setDestinationInExternalPublicDir("/"+DIRECTORY_DOWNLOADS,FNombre);
-       // request.setDestinationUri(Uri.parse(DIRECTORY_DOWNLOADS));
+        request.setDestinationInExternalPublicDir("/" + DIRECTORY_DOWNLOADS, FNombre);
         DownloadManager dm = (DownloadManager) App.getSystemService(DOWNLOAD_SERVICE);
         dm.enqueue(request);
         Toast.makeText(this.App, "Descargando Actualización",

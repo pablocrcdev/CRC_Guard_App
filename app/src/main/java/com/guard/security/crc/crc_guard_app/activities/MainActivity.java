@@ -2,7 +2,6 @@ package com.guard.security.crc.crc_guard_app.activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
@@ -32,9 +31,6 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.ViewTreeObserver;
-import android.webkit.CookieManager;
-import android.webkit.DownloadListener;
-import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -43,7 +39,6 @@ import android.widget.Toast;
 
 import com.guard.security.crc.crc_guard_app.R;
 import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
-import com.guard.security.crc.crc_guard_app.model.GlobalVariables;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
@@ -63,9 +58,6 @@ import java.util.concurrent.TimeoutException;
 
 import android.app.AlarmManager;
 
-import static android.support.v4.content.ContextCompat.startActivity;
-
-
 public class MainActivity extends AppCompatActivity {
 
     private WebView gvWebView;
@@ -73,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     //IP Public ALFA
     //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
 
-    private String mURL = "http://10.1.1.12:9090/crccoding/f?p=2560:1";
+    private String mURL = "http://10.1.1.12:9090/crccoding/f?p=2560:LOGIN_DESKTOP";
     //private String mURL =  "https://androidfilehost.com/?fid=3556969557455276147";
     //Desa Externo
     //private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
@@ -172,7 +164,10 @@ public class MainActivity extends AppCompatActivity {
         if (check == PackageManager.PERMISSION_GRANTED) {
             //Do something
         } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1024);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE,
+                    Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_NETWORK_STATE}, 1024);
         }
     }
 
@@ -236,15 +231,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-        gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         solicitarStorage();
-        solicitarAccesos();
-        /*
+        gvContext = this;
+        String deviceId = obtenerIdentificador();
+        gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        //solicitarAccesos();
+
         planificarAlarma = (AlarmManager)getSystemService(ALARM_SERVICE);
         Intent intentt = new Intent(getApplicationContext(), Sender.class);
         PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, intentt, 0);
-        planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,600000, 600000, pi);*/
+       // planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,600000, 600000, pi);
+       // planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,100, 100, pi);
+        planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,600000, 600000, pi);
         //
         if (validarEstadoRed()) {
 
@@ -254,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
             if (!hasPermissions(MainActivity.this, gvPERMISSIONS)) {
                 ActivityCompat.requestPermissions(MainActivity.this, gvPERMISSIONS, gvPERMISSION_ALL);
             }
-            gvContext = this;
+
             // Declaracion del elemento xml en la clase para configuraciones
             gvWebView = findViewById(R.id.WebView);
             // Inicializacion de elemento Progress Bar
@@ -266,8 +267,11 @@ public class MainActivity extends AppCompatActivity {
             } else if (!gvNfcAdapter.isEnabled()) {
                 Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
             }
+
+            dbhelper = new DatabaseHandler(this, "RG", null, 1);
+            db = dbhelper.getWritableDatabase();
             // Seteo de Cliente Web, para manejo de navegador interno
-            gvWebView.setWebViewClient(new ManagerWebClient(this, this, gvWebView, this));
+            gvWebView.setWebViewClient(new ManagerWebClient(this, this, gvWebView, this, dbhelper, db));
             // Habilitacion de Javascript en el webview
             gvWebView.getSettings().setJavaScriptEnabled(true);
             gvWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
@@ -277,20 +281,6 @@ public class MainActivity extends AppCompatActivity {
             gvWebView.getSettings().setAllowFileAccess(true);
             // Carga de URL en el elemento Webview
             gvWebView.loadUrl(mURL);
-            // GlobalVariables Url = new GlobalVariables().getInstance();
-            //Url.setmUrl(gvWebView.getUrl());
-            //Log.i("PRUEBA","main"+Url.getmUrl());
-            //gvWebView.loadUrl("javascript:setImei('"+obtenerIdentificador()+"');");
-            /*gvWebView.setDownloadListener(new DownloadListener() {
-                public void onDownloadStart(String url, String userAgent,
-                                            String contentDisposition, String mimetype,
-                                            long contentLength) {
-
-                    Uri uri = Uri.parse(url);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
-                }
-            });*/
 
 
             mySwipeRefreshLayout = this.findViewById(R.id.Swipe);
@@ -432,17 +422,12 @@ public class MainActivity extends AppCompatActivity {
                     openFileChooser(uploadMsg, "");
                 }
 
-                // openFileChooser for other Android versions
-            /* may not work on KitKat due to lack of implementation of openFileChooser() or onShowFileChooser()
-               https://code.google.com/p/android/issues/detail?id=62220
-               however newer versions of KitKat fixed it on some devices */
                 public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
                     openFileChooser(uploadMsg, acceptType);
                 }
             });
             //Abrimos la base de datos 'DBTest1' en modo escritura
-            dbhelper = new DatabaseHandler(this, "RG", null, 1);
-            db = dbhelper.getWritableDatabase();
+
             dbhelper.LimpiarDB(db);
             if (gvNfcAdapter != null) {
                 readFromIntent(getIntent());

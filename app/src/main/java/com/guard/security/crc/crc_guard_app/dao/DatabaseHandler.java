@@ -57,16 +57,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         db.execSQL("DELETE FROM marca_reloj WHERE ind_estado = 'PRC'  AND hora_marca <= '" + Fecha + "'");
     }
-    public void Insertar_Act_Url(SQLiteDatabase db, String url){
-       /* String query="SELECT * from tbl_url";
-        Cursor cursor= db.rawQuery(query,null);
-        //Sec = 1 porque solo se usará una unica URL
-        if (cursor.getCount() > 0){
-            db.execSQL("UPDATE tbl_url set Url'"+url+"' where SEC='1'");
-        }else{
-            db.execSQL("INSERT INTO tbl_url ");
-        }*/
-       String Query = "SELECT OR REPLACE tbl_url (SEC,URL) VALUES(1,'"+url+"'";
+
+    public void Insertar_Act_Url(String url) {
+        String Query = "REPLACE INTO tbl_url (SEC,URL) VALUES(1,'" + url + "')";
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(Query);
+
+        Log.i("SQLL",url+"INSERTADO");
+    }
+
+    public String Obt_url() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String Query = "Select * from tbl_url where sec='1'";
+        String Url = "";
+        Cursor cursor = db.rawQuery(Query, null);
+        while (cursor.moveToNext()) {
+            Url = cursor.getString(01);//Url
+        }
+
+        return Url;
     }
 
 }

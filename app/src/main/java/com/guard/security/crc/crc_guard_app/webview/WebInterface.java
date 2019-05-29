@@ -40,6 +40,10 @@ public class WebInterface {
         this.gvGPS = pGps;
         this.App = app;
     }
+    @JavascriptInterface
+    public String getLocInfo(){
+        return getIdDevice() + "," + getLatitude() + "," + getLongitude();
+    }
 
     @JavascriptInterface
     public String getLatitude() {
