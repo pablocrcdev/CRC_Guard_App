@@ -362,6 +362,7 @@ public class LocalHomeActivity extends AppCompatActivity {
         db.close();
         super.onDestroy();
     }
+
     //Parametros AsyncTask
     //1 = Parametros
     //2 = Progress
@@ -386,9 +387,9 @@ public class LocalHomeActivity extends AppCompatActivity {
 
                 try {
                     conn = (HttpURLConnection) url.openConnection();
-                    if( conn.getResponseCode() == HttpURLConnection.HTTP_OK ){
+                    if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                         InputStream is = conn.getInputStream();
-                    }else{
+                    } else {
                         InputStream err = conn.getErrorStream();
                     }
                     return "Done";
@@ -397,7 +398,7 @@ public class LocalHomeActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    if(conn != null) {
+                    if (conn != null) {
                         conn.disconnect();
                     }
                 }
