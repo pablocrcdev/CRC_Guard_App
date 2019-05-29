@@ -10,6 +10,8 @@ public class mWebClient  extends WebViewClient {
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         if (Carga != "0"){
+            //Despues de haber cargado una vez se destruye el webview
+            //Si no se destruye sigue realizando consultas (más de 30 consultas por cada wakelock)
             view.destroy();
         }
     }

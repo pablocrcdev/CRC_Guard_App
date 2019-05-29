@@ -87,7 +87,6 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
     @Override
     public void onPageFinished(WebView view, String url) {
         timeout = false;
-        Log.i("SQLL",url);
         // Al terminar de cargar si la pagina no devuelve respuesta se define el tiempo de respuesta como falso
         /*
         try {
