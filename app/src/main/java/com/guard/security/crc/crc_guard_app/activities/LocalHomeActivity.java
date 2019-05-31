@@ -1,6 +1,5 @@
 package com.guard.security.crc.crc_guard_app.activities;
-//TODO Mostrar algo cuando el listview está vacio ya qe la app se queda en blanco sin nada que mostrar
-//TODO reinstalar la app en cada telefono
+//TODO Crear metodos en JS paralelos a los que ya estan para poder trabajar con la verison vieja y la nueva y poder enviar el numero serial de los tags
 
 import android.Manifest;
 import android.app.PendingIntent;
