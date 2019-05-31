@@ -5,6 +5,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 public class mWebClient  extends WebViewClient {
+    //Si está en 0 significa que la pagina no se ha terminado de cargar
+    //Al pasar a 1 ya está cargada
     private String Carga = "0";
 
     @Override

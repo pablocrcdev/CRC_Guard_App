@@ -20,7 +20,6 @@
         android:required="true" />
 
     <application
-        android:name=".util.Global"
         android:persistent="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

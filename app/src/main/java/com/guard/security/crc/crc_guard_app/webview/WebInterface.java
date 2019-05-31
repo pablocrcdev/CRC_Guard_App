@@ -13,9 +13,7 @@ import android.telephony.TelephonyManager;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-//import com.google.gson.Gson;
 import com.guard.security.crc.crc_guard_app.BuildConfig;
-import com.guard.security.crc.crc_guard_app.activities.MainActivity;
 import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;

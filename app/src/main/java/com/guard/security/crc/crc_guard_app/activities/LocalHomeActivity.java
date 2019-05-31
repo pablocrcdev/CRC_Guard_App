@@ -20,7 +20,6 @@ import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
@@ -35,6 +34,7 @@ import com.guard.security.crc.crc_guard_app.adapters.MarcaAdapter;
 import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
+import com.guard.security.crc.crc_guard_app.util.Procesos;
 
 
 import java.io.IOException;
@@ -47,9 +47,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static com.google.gson.internal.bind.TypeAdapters.URL;
-
 
 public class LocalHomeActivity extends AppCompatActivity {
 
@@ -67,51 +64,7 @@ public class LocalHomeActivity extends AppCompatActivity {
     private Tag gvMytag;
     private IntentFilter gvWriteTagFilters[];
 
-    private int gvALL_PERMISSION = 0;
-    private int REQUEST_READ_PHONE_STATE = 1;
-    //********************************************************************************************//
-    // Metodos de validacion
-    //********************************************************************************************//
-
-    protected boolean accesarLocalizacion() {
-        int vResult = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        if (vResult == PackageManager.PERMISSION_GRANTED)
-            return true;
-        return false;
-    }
-
-    protected boolean accesarInfoDispositivo() {
-        int vResult = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
-        if (vResult == PackageManager.PERMISSION_GRANTED)
-            return true;
-        return false;
-    }
-
-    protected void solicitarAccesos() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
-                ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_PHONE_STATE)) {
-            //Codigo extra para el manejo de peticiones de permiso, en esta parte se colocalan
-            //explicaciones con respecto a los permisos. Pueden ser ventanas emergentes o Toast
-        }
-        ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE}, gvALL_PERMISSION);
-    }
-
-    protected void validarAccesos() {
-
-        int permissionCheck = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_PHONE_STATE);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_PHONE_STATE},
-                    gvALL_PERMISSION);
-
-        } else {
-            //TODO
-
-        }
-    }
+    private Procesos Procesar = new Procesos();
 
     //********************************************************************************************//
     // Inicializadores
@@ -245,7 +198,7 @@ public class LocalHomeActivity extends AppCompatActivity {
                     msgs[i] = (NdefMessage) rawMsgs[i];
                 }
             }
-            buildTagViews(msgs, getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
+            buildTagViews(msgs, Procesar.getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
         }
     }
 
@@ -279,22 +232,6 @@ public class LocalHomeActivity extends AppCompatActivity {
         actualizarListView();
     }
 
-    //Metodo compartido entre Main y Local Activity
-    private String getTagSerial_number(byte[] tagId) {
-        String hexdump = null;
-        for (int i = 0; i < tagId.length; i++) {
-            String x = Integer.toHexString(((int) tagId[i] & 0xff));
-            if (x.length() == 1) {
-                x = '0' + x;
-            }
-            if (hexdump == null) {
-                hexdump = x;
-            } else {
-                hexdump += ':' + x;
-            }
-        }
-        return hexdump;
-    }
 
     public void sonarAlarma() {
         try {
@@ -338,11 +275,7 @@ public class LocalHomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_local_home);
-        //Se elimina la versión anterior de la tabla
-        //validarAccesos();
-        if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
-            solicitarAccesos();
-        }
+        Procesar.SolicitarPermisos(this, null, this);
         listView = findViewById(R.id.listView);
         marcas = new ArrayList<>();
 
@@ -361,58 +294,5 @@ public class LocalHomeActivity extends AppCompatActivity {
         // cerramos conexión base de datos antes de destruir el activity
         db.close();
         super.onDestroy();
-    }
-
-    //Parametros AsyncTask
-    //1 = Parametros
-    //2 = Progress
-    //3 = Result
-    private class GetUrlContentTask extends AsyncTask<String, Void, String> {
-        protected String doInBackground(String... urls) {
-            String Resultado;
-            try {
-
-                URL url;
-                url = new URL(urls[0]);
-                HttpURLConnection connection;
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setDoOutput(true);
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(5000);
-                connection.connect();
-                Resultado = "SI";
-
-                HttpURLConnection conn = null;
-
-                try {
-                    conn = (HttpURLConnection) url.openConnection();
-                    if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        InputStream is = conn.getInputStream();
-                    } else {
-                        InputStream err = conn.getErrorStream();
-                    }
-                    return "Done";
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    if (conn != null) {
-                        conn.disconnect();
-                    }
-                }
-
-            } catch (
-                    Exception ex) {
-                Resultado = "NO";
-            }
-            return Resultado;
-        }
-
-        protected void onPostExecute(String result) {
-
-        }
-
     }
 }

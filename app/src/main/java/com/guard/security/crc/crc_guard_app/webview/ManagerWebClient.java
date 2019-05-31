@@ -10,11 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
-import android.os.Build;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
@@ -28,7 +24,6 @@ import com.guard.security.crc.crc_guard_app.activities.LocalHomeActivity;
 import com.guard.security.crc.crc_guard_app.activities.MainActivity;
 import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
-import com.guard.security.crc.crc_guard_app.util.Procesos;
 
 import static android.content.Context.DOWNLOAD_SERVICE;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
@@ -39,12 +34,8 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
     boolean timeout;
     private Context gvContext;
     private NfcAdapter gvNfcAdapter;
-    private int Reload = 0;
     private Activity App;
     private android.webkit.WebView Wv;
-    private MainActivity Main;
-    private DatabaseHandler DBH;
-    private SQLiteDatabase DB;
 
     //============================================================================================//
     // El contructor se define con el parametro de contexto para refenrenciar siempre al activity
@@ -55,8 +46,6 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
         timeout = true;
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(gvContext);
         this.Wv = wv;
-        this.Main = main;
-        this.DBH = dbh;
     }
 
     @Override
@@ -86,11 +75,11 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
 
     @Override
     public void onPageFinished(WebView view, String url) {
-        timeout = false;
         // Al terminar de cargar si la pagina no devuelve respuesta se define el tiempo de respuesta como falso
+        timeout = false;
+
         /*
         try {
-            timeout = false;
             Procesos P = new Procesos();
             if (P.Num_Pagina(url).equals("1")) {
                 if (Reload == 0) {
@@ -203,7 +192,7 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
         request.setDestinationInExternalPublicDir("/" + DIRECTORY_DOWNLOADS, FNombre);
         DownloadManager dm = (DownloadManager) App.getSystemService(DOWNLOAD_SERVICE);
         dm.enqueue(request);
-        Toast.makeText(this.App, "Descargando Actualización",
+        Toast.makeText(this.App, "Descargando Actualización.",
                 Toast.LENGTH_LONG).show();
     }
 }

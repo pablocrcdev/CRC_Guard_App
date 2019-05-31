@@ -19,10 +19,8 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Parcelable;
-import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -32,7 +30,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -42,11 +39,11 @@ import com.guard.security.crc.crc_guard_app.dao.DatabaseHandler;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 import com.guard.security.crc.crc_guard_app.util.ErrorController;
 import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
+import com.guard.security.crc.crc_guard_app.util.Procesos;
+import com.guard.security.crc.crc_guard_app.webview.ManagerChromeClient;
 import com.guard.security.crc.crc_guard_app.webview.ManagerWebClient;
 import com.guard.security.crc.crc_guard_app.webview.WebInterface;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -89,15 +86,16 @@ public class MainActivity extends AppCompatActivity {
 
     // =================== Variables para permisos de android =================== //
     private static final int gvFILECHOOSER_RESULTCODE = 1;
-    int gvPERMISSION_ALL = 1;
-    String[] gvPERMISSIONS = {Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE};
+    //int gvPERMISSION_ALL = 1;
+    //String[] gvPERMISSIONS = {Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE};
     // =============== Usadas para seleccion de archivos nativos =============== //
-    private ValueCallback<Uri> gvUploadMessage;
-    private Uri gvCapturedImageURI = null;
-    private ValueCallback<Uri[]> gvFilePathCallback;
-    private String gvCameraPhotoPath;
+    public ValueCallback<Uri> gvUploadMessage;
+    public Uri gvCapturedImageURI = null;
+    public ValueCallback<Uri[]> gvFilePathCallback;
+    public String gvCameraPhotoPath;
 
     private AlarmManager planificarAlarma;
+    private Procesos Procesar = new Procesos();
 
 
     //********************************************************************************************//
@@ -134,41 +132,6 @@ public class MainActivity extends AppCompatActivity {
             Resultado = false;
         }
         return Resultado;
-    }
-
-
-    protected boolean accesarLocalizacion() {
-        int vResult = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        return vResult == PackageManager.PERMISSION_GRANTED;
-    }
-
-    protected boolean accesarInfoDispositivo() {
-        int vResult = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
-        return vResult == PackageManager.PERMISSION_GRANTED;
-    }
-
-    public void solicitarAccesos() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
-                ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_PHONE_STATE)) {
-            //Codigo extra para el manejo de peticiones de permiso, en esta parte se colocan
-            //explicaciones con respecto a los permisos. Pueden ser ventanas emergentes o Toast
-        }
-        ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE}, gvALL_PERMISSION);
-
-    }
-
-    protected void solicitarStorage() {
-        int check = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (check == PackageManager.PERMISSION_GRANTED) {
-            //Do something
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE,
-                    Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_NETWORK_STATE}, 1024);
-        }
     }
 
     public String obtenerIdentificador() {
@@ -233,28 +196,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        solicitarStorage();
+        Procesar.SolicitarPermisos(this, this, null);
         gvContext = this;
+
         String deviceId = obtenerIdentificador();
         gvNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
-        //solicitarAccesos();
-
-        planificarAlarma = (AlarmManager)getSystemService(ALARM_SERVICE);
+        planificarAlarma = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent intentt = new Intent(getApplicationContext(), Sender.class);
         PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, intentt, 0);
-       // planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,600000, 600000, pi);
-       // planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,100, 100, pi);
-        planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,600000, 600000, pi);
+        planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 600000, 600000, pi);
         //
         if (validarEstadoRed()) {
-
-            if (!accesarLocalizacion() && !accesarInfoDispositivo()) {
-                solicitarAccesos();
-            }
-            if (!hasPermissions(MainActivity.this, gvPERMISSIONS)) {
-                ActivityCompat.requestPermissions(MainActivity.this, gvPERMISSIONS, gvPERMISSION_ALL);
-            }
 
             // Declaracion del elemento xml en la clase para configuraciones
             gvWebView = findViewById(R.id.WebView);
@@ -263,7 +216,6 @@ public class MainActivity extends AppCompatActivity {
 
             if (gvNfcAdapter == null) {
                 Toast.makeText(this, "El dispositivo no soporta NFC.", Toast.LENGTH_LONG).show();
-                //finish();
             } else if (!gvNfcAdapter.isEnabled()) {
                 Toast.makeText(this, "NFC desactivado.", Toast.LENGTH_LONG).show();
             }
@@ -295,139 +247,17 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
-            //La recarga tiene problemas de scroll
-
             mySwipeRefreshLayout.setOnRefreshListener(
                     new SwipeRefreshLayout.OnRefreshListener() {
                         @Override
                         public void onRefresh() {
                             gvWebView.reload();
-                            //mySwipeRefreshLayout.getViewTreeObserver().removeOnScrollChangedListener(mOnScrollChangedListener);
                             mySwipeRefreshLayout.setRefreshing(false);
                         }
                     }
             );
-
-            gvWebView.setWebChromeClient(new WebChromeClient() {
-                // page loading progress, gone when fully loaded
-                public void onProgressChanged(WebView view, int progress) {
-                    if (progress < 100 && gvProgressBar.getVisibility() == ProgressBar.GONE) {
-                        gvProgressBar.setVisibility(ProgressBar.VISIBLE);
-                    }
-                    gvProgressBar.setProgress(progress);
-                    if (progress == 100) {
-                        gvProgressBar.setVisibility(ProgressBar.GONE);
-                    }
-                }
-
-
-                @Override
-                public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-                    if (gvFilePathCallback != null) {
-                        gvFilePathCallback.onReceiveValue(null);
-                    }
-                    gvFilePathCallback = filePathCallback;
-                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-
-                        // create the file where the photo should go
-                        File photoFile = null;
-                        try {
-                            photoFile = createImageFile();
-                            takePictureIntent.putExtra("PhotoPath", gvCameraPhotoPath);
-                        } catch (IOException ex) {
-                            // Error occurred while creating the File
-                            Log.e("UPLOADFILE", "Unable to create Image File", ex);
-                        }
-
-                        // continue only if the file was successfully created
-                        if (photoFile != null) {
-                            gvCameraPhotoPath = "file:" + photoFile.getAbsolutePath();
-                            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                                    Uri.fromFile(photoFile));
-                        } else {
-                            takePictureIntent = null;
-                        }
-                    }
-                    Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                    contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                    contentSelectionIntent.setType("image/*");
-
-                    Intent[] intentArray;
-                    if (takePictureIntent != null) {
-                        intentArray = new Intent[]{takePictureIntent};
-                    } else {
-                        intentArray = new Intent[0];
-                    }
-
-                    Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
-                    chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
-                    chooserIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.app_name));
-                    chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
-
-                    startActivityForResult(chooserIntent, gvFILECHOOSER_RESULTCODE);
-
-                    return true;
-                }
-
-                // creating image files (Lollipop only)
-                private File createImageFile() throws IOException {
-
-                    File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "DirectoryNameHere");
-
-                    if (!imageStorageDir.exists()) {
-                        imageStorageDir.mkdirs();
-                    }
-
-                    // create an image file name
-                    imageStorageDir = new File(imageStorageDir + File.separator + "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-                    return imageStorageDir;
-                }
-
-                // openFileChooser for Android 3.0+
-                public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
-                    gvUploadMessage = uploadMsg;
-
-                    try {
-                        File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "DirectoryNameHere");
-
-                        if (!imageStorageDir.exists()) {
-                            imageStorageDir.mkdirs();
-                        }
-
-                        File file = new File(imageStorageDir + File.separator + "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-
-                        gvCapturedImageURI = Uri.fromFile(file); // save to the private variable
-
-                        final Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                        captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, gvCapturedImageURI);
-                        // captureIntent.putExtra(MediaStore.EXTRA_SCREEN_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-                        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                        i.addCategory(Intent.CATEGORY_OPENABLE);
-                        i.setType("image/*");
-
-                        Intent chooserIntent = Intent.createChooser(i, getString(R.string.app_name));
-                        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Parcelable[]{captureIntent});
-
-                        startActivityForResult(chooserIntent, gvFILECHOOSER_RESULTCODE);
-                    } catch (Exception e) {
-                        Toast.makeText(getBaseContext(), "Camera Exception:" + e, Toast.LENGTH_LONG).show();
-                    }
-
-                }
-
-                // openFileChooser for Android < 3.0
-                public void openFileChooser(ValueCallback<Uri> uploadMsg) {
-                    openFileChooser(uploadMsg, "");
-                }
-
-                public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
-                    openFileChooser(uploadMsg, acceptType);
-                }
-            });
-            //Abrimos la base de datos 'DBTest1' en modo escritura
-
+            gvWebView.setWebChromeClient(new ManagerChromeClient(gvProgressBar, this));
+            //Se limpia la db de tags pasados y procesados(a partir de 1 mes anterior al actual)
             dbhelper.LimpiarDB(db);
             if (gvNfcAdapter != null) {
                 readFromIntent(getIntent());
@@ -477,25 +307,8 @@ public class MainActivity extends AppCompatActivity {
                     msgs[i] = (NdefMessage) rawMsgs[i];
                 }
             }
-            buildTagViews(msgs, getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
+            buildTagViews(msgs, Procesar.getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
         }
-    }
-
-    //Metodo compartido entre Main y Local Activity
-    private String getTagSerial_number(byte[] tagId) {
-        String hexdump = null;
-        for (int i = 0; i < tagId.length; i++) {
-            String x = Integer.toHexString(((int) tagId[i] & 0xff));
-            if (x.length() == 1) {
-                x = '0' + x;
-            }
-            if (hexdump == null) {
-                hexdump = x;
-            } else {
-                hexdump += ':' + x;
-            }
-        }
-        return hexdump;
     }
 
     private void buildTagViews(NdefMessage[] pMsgs, String pNumSerial) {
@@ -572,6 +385,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Resultado de cuando se toma una foto con el ManagerChromeClient
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // code for all versions except of Lollipop
