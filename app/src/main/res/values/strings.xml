@@ -2,6 +2,7 @@
     <string name="app_name">ProXtor</string>
     <!--Acciones de botones-->
     <string name="sOK">OK</string>
+    <string name="sReconectar">Reconectar</string>
     <!--Errores-->
     <string name="sError_carga">Error al cargar la página... Intente nuevamente</string>
     <string name="sError_Red">Error de Red... Verifique la conexión a internet</string>

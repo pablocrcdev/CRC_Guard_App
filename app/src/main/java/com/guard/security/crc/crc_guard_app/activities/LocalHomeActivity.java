@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -52,13 +53,10 @@ public class LocalHomeActivity extends AppCompatActivity {
 
     private DatabaseHandler dbHelper;
     private SQLiteDatabase db;
-
     private ListView listView;
     private MarcaAdapter adapter;
     private List<Marca> marcas;
-
     private GPSRastreador gvGPS;
-
     private NfcAdapter gvNfcAdapter;
     private PendingIntent gvPendingIntent;
     private Tag gvMytag;
@@ -287,6 +285,16 @@ public class LocalHomeActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
         actualizarListView();
         dbHelper.LimpiarDB(db);
+
+        final Button button = (Button) findViewById(R.id.btnReconectar);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                MainActivity main = new MainActivity();
+                Intent intent = new Intent(LocalHomeActivity.this,MainActivity.class
+                );
+                startActivity(intent);
+            }
+        });
     }
 
     @Override

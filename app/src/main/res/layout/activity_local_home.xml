@@ -20,7 +20,6 @@
         android:layout_marginBottom="2dp"/>
 
 
-
     <ListView
         android:id="@+id/listView"
         android:layout_width="wrap_content"
@@ -29,7 +28,19 @@
         android:background="@color/grey_200"
         android:divider="@color/blue_grey_200"
         android:dividerHeight="1dp"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical" >
+
+    </ListView>
+
+    <Button
+        android:id="@+id/btnReconectar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/accent"
+        android:backgroundTint="#3F51B5"
+        android:text="@string/sReconectar"
+        android:textColor="#FCFBFB" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -46,7 +57,11 @@
             android:textAlignment="center"
             android:textSize="24sp" />
 
+
+
     </LinearLayout>
+
+
 
 </LinearLayout>
 

@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
@@ -77,7 +78,7 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
     public void onPageFinished(WebView view, String url) {
         // Al terminar de cargar si la pagina no devuelve respuesta se define el tiempo de respuesta como falso
         timeout = false;
-
+        //Log.i("PRUEBA",url)
         /*
         try {
             Procesos P = new Procesos();
@@ -106,8 +107,12 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         if (gvNfcAdapter != null) {
+           // Log.i("PRUEBA",error.getDescription().toString());
             if (error.getDescription().toString().equals("net::ERR_CACHE_MISS")) {
                 Intent intent = new Intent(gvContext, MainActivity.class);
+                gvContext.startActivity(intent);
+            }else{
+                Intent intent = new Intent(gvContext, LocalHomeActivity.class);
                 gvContext.startActivity(intent);
             }
             //Posibles erroes:
@@ -116,6 +121,7 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
             "net::ERR_INTERNET_DISCONNECTED"
             "net::ERR_CONNECTION_ABORTED"
              */
+            /*
             if (error.getDescription().toString().equals("net::ERR_CONNECTION_ABORTED")) {
                 Intent intent = new Intent(gvContext, LocalHomeActivity.class);
                 gvContext.startActivity(intent);
@@ -127,7 +133,7 @@ public class ManagerWebClient extends WebViewClient implements DownloadListener 
             if (error.getDescription().toString().equals("net::ERR_CONNECTION_REFUSED")) {
                 Intent intent = new Intent(gvContext, LocalHomeActivity.class);
                 gvContext.startActivity(intent);
-            }
+            }*/
 
         } else {
             view.setVisibility(View.INVISIBLE);

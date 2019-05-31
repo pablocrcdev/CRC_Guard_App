@@ -61,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar gvProgressBar;
     //IP Public ALFA
     //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
-
     private String mURL = "http://10.1.1.12:9090/crccoding/f?p=2560:LOGIN_DESKTOP";
     //private String mURL =  "https://androidfilehost.com/?fid=3556969557455276147";
     //Desa Externo
@@ -71,9 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
     private SQLiteDatabase db;
     private DatabaseHandler dbhelper;
-
     private GPSRastreador gvGPS;
-
     private NfcAdapter gvNfcAdapter;
     private PendingIntent gvPendingIntent;
     private IntentFilter gvWriteTagFilters[];
@@ -83,20 +80,15 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout mySwipeRefreshLayout;
     private ViewTreeObserver.OnScrollChangedListener mOnScrollChangedListener;
     private int gvALL_PERMISSION = 0;
-
     // =================== Variables para permisos de android =================== //
     private static final int gvFILECHOOSER_RESULTCODE = 1;
-    //int gvPERMISSION_ALL = 1;
-    //String[] gvPERMISSIONS = {Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE};
     // =============== Usadas para seleccion de archivos nativos =============== //
     public ValueCallback<Uri> gvUploadMessage;
     public Uri gvCapturedImageURI = null;
     public ValueCallback<Uri[]> gvFilePathCallback;
     public String gvCameraPhotoPath;
-
     private AlarmManager planificarAlarma;
     private Procesos Procesar = new Procesos();
-
 
     //********************************************************************************************//
     // Metodos de validacion
@@ -165,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
     //********************************************************************************************//
     // Metodos para interactuar con la base de datos
     //********************************************************************************************//
-    private void registrarMarca(Marca pMarca) {
+    private void registrarMarca(Marca pMarca, String Estado) {
         //Si hemos abierto correctamente la base de datos
         if (db != null) {
             //Creamos el registro a insertar como objeto ContentValues
@@ -176,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
             nuevoRegistro.put("hora_marca", pMarca.getHoraMarca());
             nuevoRegistro.put("latitud", pMarca.getLat());
             nuevoRegistro.put("longitud", pMarca.getLng());
-            nuevoRegistro.put("ind_estado", "PRC");
+            nuevoRegistro.put("ind_estado", Estado);
             nuevoRegistro.put("num_serial", pMarca.getNum_serial());
 
 
@@ -208,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
         planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 600000, 600000, pi);
         //
         if (validarEstadoRed()) {
+
 
             // Declaracion del elemento xml en la clase para configuraciones
             gvWebView = findViewById(R.id.WebView);
@@ -272,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
             if (gvNfcAdapter == null)
                 new ErrorController(this).showNetworkDialog();
             else {
+                Toast.makeText(this, "No hay conexión a internet.", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, LocalHomeActivity.class);
                 startActivity(intent);
             }
@@ -334,13 +328,18 @@ public class MainActivity extends AppCompatActivity {
                 dateFormat.format(date),
                 Double.toString(gvGPS.obtenerLatitud()),
                 Double.toString(gvGPS.obtenerLongitud()));
-        registrarMarca(marca);
-        gvWebView.loadUrl("javascript:receiveData('" + marca.getImei() + "'" +
-                ",'" + marca.getNfcData() + "'" +
-                ",'" + marca.getHoraMarca() + "'" +
-                ",'" + marca.getLat() + "'" +
-                ",'" + marca.getLng() + "'" +
-                ",'" + "NFC" + "');");
+        if (Procesar.Num_Pagina(gvWebView.getUrl()).equals("2")) {
+            gvWebView.loadUrl("javascript:receiveData('" + marca.getImei() + "'" +
+                    ",'" + marca.getNfcData() + "'" +
+                    ",'" + marca.getHoraMarca() + "'" +
+                    ",'" + marca.getLat() + "'" +
+                    ",'" + marca.getLng() + "'" +
+                    ",'" + "NFC" + "');");
+            registrarMarca(marca, "PRC");
+        } else {
+            registrarMarca(marca, "PEN");
+        }
+
 
     }
 

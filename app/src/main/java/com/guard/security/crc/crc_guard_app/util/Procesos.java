@@ -59,6 +59,7 @@ public class Procesos {
                 String[] Procesado = UrlS[i].split(":");
                 for (int p = 1; p < 2; p++) {
                     Resultado = Procesado[i];
+                    break;
                 }
             }
         } catch (Exception io) {
@@ -77,8 +78,7 @@ public class Procesos {
         String[] url = Url.split("=");
         String Resultado = "";
         for (int i = 1; i < url.length; i++) {
-            String[] Params = url[i].split(":");
-            Resultado = Params[2];
+            Resultado = url[i].split(":")[2];
             break;
         }
         return Resultado;
