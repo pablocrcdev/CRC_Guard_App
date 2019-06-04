@@ -33,13 +33,14 @@ public class WebInterface {
     private DatabaseHandler dbhelper;
 
     //Constructor de la clase que solo recibe el contexto de la apicacion
-    public WebInterface(Context pContext, GPSRastreador pGps, Activity app){//, String pIdDevice) {
+    public WebInterface(Context pContext, GPSRastreador pGps, Activity app) {//, String pIdDevice) {
         this.gvContext = pContext;
         this.gvGPS = pGps;
         this.App = app;
     }
+
     @JavascriptInterface
-    public String getLocInfo(){
+    public String getLocInfo() {
         return getIdDevice() + "," + getLatitude() + "," + getLongitude();
     }
 
@@ -72,7 +73,7 @@ public class WebInterface {
     }
 
     @JavascriptInterface
-    public boolean validarPendientes(){
+    public boolean validarPendientes() {
         dbhelper = new DatabaseHandler(gvContext, "RG", null, 1);
         db = dbhelper.getWritableDatabase();
         if (db != null) {
@@ -84,31 +85,32 @@ public class WebInterface {
                 return true;
             return false;
         }
-        Toast.makeText(gvContext, "La base de datos no existe! Informe al Administrador de la aplicación", Toast.LENGTH_LONG ).show();
+        Toast.makeText(gvContext, "La base de datos no existe! Informe al Administrador de la aplicación", Toast.LENGTH_LONG).show();
         return false;
     }
 
     @JavascriptInterface
-    public void actualizaRegistros(){
+    public void actualizaRegistros() {
 
-        Toast.makeText(gvContext, "Actualizando registros", Toast.LENGTH_LONG ).show();
+        Toast.makeText(gvContext, "Actualizando registros", Toast.LENGTH_LONG).show();
         actualizarRegistroPendiente();
     }
 
     @JavascriptInterface
-    public String getMarks(){
+    public String getMarks() {
         return getJSON((ArrayList<Marca>) obtenerMarcas());
     }
 
 
     @JavascriptInterface
-    public String getImei(){
+    public String getImei() {
         ArrayList<String> Imei = new ArrayList<>();
         Imei.add(obtenerIdentificador2(this.gvContext));
         return getJSONImei(Imei);
     }
+
     @JavascriptInterface
-    public String getAppVersion(){
+    public String getAppVersion() {
         return BuildConfig.VERSION_NAME;
     }
 
@@ -134,7 +136,7 @@ public class WebInterface {
         for (String Imei : list) {
             obj = new JSONObject();
             try {
-                obj.put("Imei",Imei);
+                obj.put("Imei", Imei);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -142,7 +144,7 @@ public class WebInterface {
             jsonArray.put(obj);
         }
         try {
-            listJSON.put("Imei",jsonArray);
+            listJSON.put("Imei", jsonArray);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -163,6 +165,7 @@ public class WebInterface {
                 obj.put("hora", marcas.getHoraMarca());
                 obj.put("lat", marcas.getLat());
                 obj.put("lng", marcas.getLng());
+                obj.put("num_serial",marcas.getNum_serial());
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -170,7 +173,7 @@ public class WebInterface {
             jsonArray.put(obj);
         }
         try {
-            listJSON.put("marcas",jsonArray);
+            listJSON.put("marcas", jsonArray);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -183,16 +186,16 @@ public class WebInterface {
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return telephonyManager.getImei();
-        }else{
+        } else {
             return telephonyManager.getDeviceId();
         }
 
     }
 
-    private List<Marca> obtenerMarcas(){
+    private List<Marca> obtenerMarcas() {
         // Seleccionamos todos los registros de la tabla Cars
         Cursor cursor = db.rawQuery("select * from marca_reloj where ind_estado = 'PEN'", null);
-        List<Marca> list = new ArrayList<Marca>();
+        List<Marca> list = new ArrayList<>();
         if (cursor.moveToFirst()) {
             // iteramos sobre el cursor de resultados,
             // y vamos rellenando el array que posteriormente devolveremos
@@ -205,14 +208,14 @@ public class WebInterface {
                 String lng = cursor.getString(cursor.getColumnIndex("longitud"));
                 String estado = cursor.getString(cursor.getColumnIndex("ind_estado"));
                 String numSerial = cursor.getString(cursor.getColumnIndex("num_serial"));
-                list.add(new Marca(dbId, idDevice, numSerial, nfcData, horaMarca, lat, lng, estado));
+                list.add(new Marca(dbId, idDevice, nfcData, numSerial, horaMarca, lat, lng, estado));
                 cursor.moveToNext();
             }
         }
         return list;
     }
 
-    private void actualizarRegistroPendiente(){
+    private void actualizarRegistroPendiente() {
         dbhelper = new DatabaseHandler(gvContext, "RG", null, 1);
         db = dbhelper.getWritableDatabase();
 
@@ -220,7 +223,7 @@ public class WebInterface {
             ContentValues cv = new ContentValues();
             cv.put("ind_estado", "PRC"); // registro de estado (ACT)ualizado
 
-            db.update("marca_reloj", cv, "ind_estado="+ "\"PEN\"", null);
+            db.update("marca_reloj", cv, "ind_estado=" + "\"PEN\"", null);
         }
 
     }

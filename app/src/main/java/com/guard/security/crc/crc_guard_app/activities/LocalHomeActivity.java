@@ -16,7 +16,6 @@ import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -37,12 +36,7 @@ import com.guard.security.crc.crc_guard_app.util.GPSRastreador;
 import com.guard.security.crc.crc_guard_app.util.Procesos;
 
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -134,7 +128,6 @@ public class LocalHomeActivity extends AppCompatActivity {
             nuevoRegistro.put("latitud", pMarca.getLat());
             nuevoRegistro.put("longitud", pMarca.getLng());
             nuevoRegistro.put("num_serial", pMarca.getNum_serial());
-
             //Insertamos el registro en la base de datos
             db.insert("marca_reloj", null, nuevoRegistro);
         }
@@ -285,11 +278,10 @@ public class LocalHomeActivity extends AppCompatActivity {
         actualizarListView();
         dbHelper.LimpiarDB(db);
 
-        final Button button = (Button) findViewById(R.id.btnReconectar);
+        final Button button = findViewById(R.id.btnReconectar);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                MainActivity main = new MainActivity();
-                Intent intent = new Intent(LocalHomeActivity.this,MainActivity.class
+                Intent intent = new Intent(LocalHomeActivity.this, MainActivity.class
                 );
                 startActivity(intent);
             }

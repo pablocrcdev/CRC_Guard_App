@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
             buildTagViews(msgs, Procesar.getTagSerial_number(getIntent().getByteArrayExtra(NfcAdapter.EXTRA_ID)));
         }
     }
-
+    //Metodo compartido , poner en Procesos
     private void buildTagViews(NdefMessage[] pMsgs, String pNumSerial) {
         if (pMsgs == null || pMsgs.length == 0) return;
 
@@ -329,12 +329,13 @@ public class MainActivity extends AppCompatActivity {
                 Double.toString(gvGPS.obtenerLatitud()),
                 Double.toString(gvGPS.obtenerLongitud()));
         if (Procesar.Num_Pagina(gvWebView.getUrl()).equals("2")) {
-            gvWebView.loadUrl("javascript:receiveData('" + marca.getImei() + "'" +
+            gvWebView.loadUrl("javascript:receiveData_up('" + marca.getImei() + "'" +
                     ",'" + marca.getNfcData() + "'" +
                     ",'" + marca.getHoraMarca() + "'" +
                     ",'" + marca.getLat() + "'" +
                     ",'" + marca.getLng() + "'" +
-                    ",'" + "NFC" + "');");
+                    ",'" + "NFC" + "'" +
+                    ",'"+ marca.getNum_serial() + "');");
             registrarMarca(marca, "PRC");
         } else {
             registrarMarca(marca, "PEN");
