@@ -22,7 +22,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -60,8 +59,8 @@ public class MainActivity extends AppCompatActivity {
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
     //IP Public ALFA
-    //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
-    private String mURL = "http://10.1.1.12:9090/crccoding/f?p=2560:LOGIN_DESKTOP";
+    private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+    //private String mURL = "http://10.1.1.12:9090/crccoding/f?p=2560:LOGIN_DESKTOP";
     //private String mURL =  "https://androidfilehost.com/?fid=3556969557455276147";
     //Desa Externo
     //private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
@@ -197,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         planificarAlarma = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent intentt = new Intent(getApplicationContext(), Sender.class);
         PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, intentt, 0);
-        planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 600000, 600000, pi);
+        planificarAlarma.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 900000, 900000, pi);
         //
         if (validarEstadoRed()) {
 

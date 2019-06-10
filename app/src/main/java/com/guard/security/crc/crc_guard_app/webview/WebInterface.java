@@ -165,7 +165,7 @@ public class WebInterface {
                 obj.put("hora", marcas.getHoraMarca());
                 obj.put("lat", marcas.getLat());
                 obj.put("lng", marcas.getLng());
-                obj.put("num_serial",marcas.getNum_serial());
+                obj.put("num_serial", marcas.getNum_serial());
 
             } catch (JSONException e) {
                 e.printStackTrace();

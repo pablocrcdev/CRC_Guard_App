@@ -15,7 +15,9 @@ public class Sender extends BroadcastReceiver {
      * que se envía la ubicación a APEX
      * También se puede reemplazar con un WebService para evitar el choque de sesiones.
      */
-    private String mURL = "http://10.1.1.12:9090/crccoding/f?p=103:1";
+    //private String mURL = "http://10.1.1.12:9090/crccoding/f?p=103:1";
+            //Publico de alfa
+    private String mURL = "http://186.96.89.66:9090/crccoding/f?p=103:1";
     private GPSRastreador gvGPS;
 
 
