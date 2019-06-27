@@ -35,6 +35,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 "num_serial text," +
                 "ind_estado text default \"PEN\")");
         //
+        //Para marcas de entrada y salida / almuerzo
+        sqLiteDatabase.execSQL("create table marca_en_sal("+
+                 "num_marca integer primary key autoincrement,"+
+                 "id_usuario,"+
+                 "imei_device text,"+
+                 "nfc_data text,"+//No es necesario, solo si la marca se hace con nfc
+                 "hora_marca datetime,"+
+                 "latitud text,"+
+                 "longitud text,"+
+                 "num_serial,"+//No es necesario, solo si la marca se hace con nfc
+                 "tip_registro,"+
+                 "ind_estado text default \"PEN\")");
         sqLiteDatabase.execSQL("create table tbl_url (" + "SEC integer," + "Url text" + ")");
     }
 
@@ -50,7 +62,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void LimpiarDB(SQLiteDatabase db) {
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MONTH, -1);
+        calendar.add(Calendar.MONTH, -2);
         Date date = calendar.getTime();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         String Fecha = dateFormat.format(date);
@@ -74,7 +86,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         while (cursor.moveToNext()) {
             Url = cursor.getString(01);//Url
         }
-
         return Url;
     }
 

@@ -3,7 +3,7 @@
 buildscript {
     
     ext {
-        APP_VERSION = 2.1
+        APP_VERSION = '2,1'
     }
     repositories {
         google()
