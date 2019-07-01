@@ -59,7 +59,10 @@ public class MainActivity extends AppCompatActivity {
     private WebView gvWebView;
     private ProgressBar gvProgressBar;
     //IP Public ALFA
-    private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+    //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
+    //Nicloud
+    private String mURL = "http://web.plenusa.com:8095/apex/f?p=2560:9999";
+
     //private String mURL = "http://10.1.1.12:9090/crccoding/f?p=2560:LOGIN_DESKTOP";
     //private String mURL =  "https://androidfilehost.com/?fid=3556969557455276147";
     //Desa Externo

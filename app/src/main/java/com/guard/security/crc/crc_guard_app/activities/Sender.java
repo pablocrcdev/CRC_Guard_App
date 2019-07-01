@@ -17,7 +17,9 @@ public class Sender extends BroadcastReceiver {
      */
     //private String mURL = "http://10.1.1.12:9090/crccoding/f?p=103:1";
             //Publico de alfa
-    private String mURL = "http://186.96.89.66:9090/crccoding/f?p=103:1";
+    //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=103:1";
+    //Nicloud
+    private String mURL = "http://web.plenusa.com:8095/apex/f?p=2560:9999";
     private GPSRastreador gvGPS;
 
 
