@@ -3,16 +3,17 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "com.guard.security.crc.crc_guard_app"
-        minSdkVersion 15
-        targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        applicationId 'com.guard.security.crc.crc_guard_desa'
+        minSdkVersion 23
+        targetSdkVersion 26
+        versionCode 21
+        versionName '2,1'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -25,5 +26,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'com.google.code.gson:gson:2.3.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.android.support:design:27.0.0'
 }

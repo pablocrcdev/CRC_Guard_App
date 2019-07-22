@@ -1,8 +1,5 @@
 package com.guard.security.crc.crc_guard_app.webview;
 
-import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
@@ -13,71 +10,55 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.guard.security.crc.crc_guard_app.R;
+import com.guard.security.crc.crc_guard_app.activities.MainActivity;
 
 import java.io.File;
 import java.io.IOException;
 
 public class ManagerChromeClient extends WebChromeClient {
-    //=============================VARIABLES GLOBALES=============================================//
-    private ProgressBar gvProgressBar;
-    private Context gvContext;
-    // =================== Variables para permisos de android =================== //
     private static final int gvFILECHOOSER_RESULTCODE = 1;
-    int gvPERMISSION_ALL = 1;
-    String[] gvPERMISSIONS = {Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE};
-    // =============== Usadas para seleccion de archivos nativos =============== //
-    private ValueCallback<Uri> gvUploadMessage;
-    private Uri gvCapturedImageURI = null;
-    private ValueCallback<Uri[]> gvFilePathCallback;
-    private String gvCameraPhotoPath;
-    //============================================================================================//
-    // El contructor se define con el parametro de contexto para refenrenciar siempre al activity
-    // que este en primer plano y poder aplicar funciones sobre el mismo
-    public ManagerChromeClient(Context pcontext){
-        gvContext = pcontext;
+    private ProgressBar gvProgressBar;
+    public MainActivity app;
+
+    public ManagerChromeClient(ProgressBar pProgressBar, MainActivity main) {
+        this.gvProgressBar = pProgressBar;
+        this.app = main;
     }
-    //============================================================================================//
+
     public void onProgressChanged(WebView view, int progress) {
-        // Definimos la variable asociada al progress bar, esto aplicando el casting con el contexto
-        // de la app que se este ejecutando y que referencia esta clase
-        gvProgressBar = (ProgressBar) ((Activity)gvContext).findViewById(R.id.progressBar);
-        // Validamos el progreso y mostramos si esta cargando
         if (progress < 100 && gvProgressBar.getVisibility() == ProgressBar.GONE) {
             gvProgressBar.setVisibility(ProgressBar.VISIBLE);
         }
-        // Despues asignamos el valor de progreso a la barra de progreso
         gvProgressBar.setProgress(progress);
-        // Si la carga se completo se oculta el item
         if (progress == 100) {
             gvProgressBar.setVisibility(ProgressBar.GONE);
         }
     }
+
     @Override
     public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-        if (gvFilePathCallback != null) {
-            gvFilePathCallback.onReceiveValue(null);
+        if (app.gvFilePathCallback != null) {
+            app.gvFilePathCallback.onReceiveValue(null);
         }
-        gvFilePathCallback = filePathCallback;
-
+        app.gvFilePathCallback = filePathCallback;
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(gvContext.getPackageManager()) != null) {
+        if (takePictureIntent.resolveActivity(app.getPackageManager()) != null) {
 
             // create the file where the photo should go
             File photoFile = null;
             try {
                 photoFile = createImageFile();
-                takePictureIntent.putExtra("PhotoPath", gvCameraPhotoPath);
+                takePictureIntent.putExtra("PhotoPath", app.gvCameraPhotoPath);
             } catch (IOException ex) {
                 // Error occurred while creating the File
-                Log.e("UPLOADFILE", "Unable to create Image File", ex);
+                Log.e("UPLOADFILE", "No se pudo tomar la imagen.", ex);
             }
 
             // continue only if the file was successfully created
             if (photoFile != null) {
-                gvCameraPhotoPath = "file:" + photoFile.getAbsolutePath();
+                app.gvCameraPhotoPath = "file:" + photoFile.getAbsolutePath();
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         Uri.fromFile(photoFile));
             } else {
@@ -97,13 +78,14 @@ public class ManagerChromeClient extends WebChromeClient {
 
         Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
         chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
-        chooserIntent.putExtra(Intent.EXTRA_TITLE, gvContext.getString(R.string.app_name));
+        chooserIntent.putExtra(Intent.EXTRA_TITLE, app.getString(R.string.app_name));
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
 
-        ((Activity) gvContext).startActivityForResult(chooserIntent, gvFILECHOOSER_RESULTCODE);
+        app.startActivityForResult(chooserIntent, gvFILECHOOSER_RESULTCODE);
 
         return true;
     }
+
     // creating image files (Lollipop only)
     private File createImageFile() throws IOException {
 
@@ -114,13 +96,13 @@ public class ManagerChromeClient extends WebChromeClient {
         }
 
         // create an image file name
-        imageStorageDir  = new File(imageStorageDir + File.separator + "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+        imageStorageDir = new File(imageStorageDir + File.separator + "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
         return imageStorageDir;
     }
 
     // openFileChooser for Android 3.0+
     public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
-        gvUploadMessage = uploadMsg;
+        app.gvUploadMessage = uploadMsg;
 
         try {
             File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "DirectoryNameHere");
@@ -131,24 +113,21 @@ public class ManagerChromeClient extends WebChromeClient {
 
             File file = new File(imageStorageDir + File.separator + "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
 
-            gvCapturedImageURI = Uri.fromFile(file); // save to the private variable
+            app.gvCapturedImageURI = Uri.fromFile(file); // save to the private variable
 
             final Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-            captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, gvCapturedImageURI);
-            // captureIntent.putExtra(MediaStore.EXTRA_SCREEN_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, app.gvCapturedImageURI);
 
             Intent i = new Intent(Intent.ACTION_GET_CONTENT);
             i.addCategory(Intent.CATEGORY_OPENABLE);
             i.setType("image/*");
 
-            Intent chooserIntent = Intent.createChooser(i, gvContext.getString(R.string.app_name));
+            Intent chooserIntent = Intent.createChooser(i, app.getString(R.string.app_name));
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Parcelable[]{captureIntent});
 
-
-            ((Activity) gvContext).startActivityForResult(chooserIntent, gvFILECHOOSER_RESULTCODE);
-
+            app.startActivityForResult(chooserIntent, gvFILECHOOSER_RESULTCODE);
         } catch (Exception e) {
-            Toast.makeText(gvContext, "Camera Exception:" + e, Toast.LENGTH_LONG).show();
+            //Toast.makeText(getBaseContext(), "Camera Exception:" + e, Toast.LENGTH_LONG).show();
         }
 
     }
@@ -158,11 +137,8 @@ public class ManagerChromeClient extends WebChromeClient {
         openFileChooser(uploadMsg, "");
     }
 
-    // openFileChooser for other Android versions
-            /* may not work on KitKat due to lack of implementation of openFileChooser() or onShowFileChooser()
-               https://code.google.com/p/android/issues/detail?id=62220
-               however newer versions of KitKat fixed it on some devices */
     public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
         openFileChooser(uploadMsg, acceptType);
     }
+
 }

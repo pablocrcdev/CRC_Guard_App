@@ -84,6 +84,8 @@ public class GPSRastreador extends Service implements LocationListener {
         return gvLocalizacion;
     }
 
+
+
     //----------------------------------Permisos de Acceso----------------------------------------//
     public boolean poderObtenerLocacion() {
         return this.gvPuedeObtenerLocalizacion;
@@ -111,11 +113,11 @@ public class GPSRastreador extends Service implements LocationListener {
 
     public void detenerGPS() {
         if (managerLocalizacion != null) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+           /* if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            }
+            }*/
             managerLocalizacion.removeUpdates(GPSRastreador.this);
         }
     }
