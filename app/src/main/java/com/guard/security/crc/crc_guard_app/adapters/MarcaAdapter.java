@@ -10,6 +10,8 @@ import android.widget.TextView;
 import com.guard.security.crc.crc_guard_app.R;
 import com.guard.security.crc.crc_guard_app.model.Marca;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 public class MarcaAdapter extends BaseAdapter {
@@ -46,7 +48,9 @@ public class MarcaAdapter extends BaseAdapter {
             vh.estado =  convertView.findViewById(R.id.txtEstado);
             vh.horaMarca =  convertView.findViewById(R.id.txtTitulo_Hora);
             vh.numMarca = convertView.findViewById(R.id.txtTitulo_Marca);
+            vh.Imei = convertView.findViewById(R.id.txtImei);
             convertView.setTag(vh);
+
         } else {
             vh = (ViewHolder) convertView.getTag();
         }
@@ -63,6 +67,8 @@ public class MarcaAdapter extends BaseAdapter {
         vh.estado.setText(Resultado_Estado);
         vh.numMarca.setText("Marca #"+currentMarca.getDbId());
         vh.horaMarca.setText("Hora: "+currentMarca.getHoraMarca());
+        vh.Imei.setText("Imei:" + currentMarca.getImei());
+
 
         return convertView;
     }
@@ -71,5 +77,6 @@ public class MarcaAdapter extends BaseAdapter {
         TextView numMarca;
         TextView horaMarca;
         TextView estado;
+        TextView Imei;
     }
 }

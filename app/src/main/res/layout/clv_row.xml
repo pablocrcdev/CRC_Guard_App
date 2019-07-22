@@ -5,41 +5,45 @@
     android:orientation="horizontal"
     android:gravity="center"
     android:layout_marginTop="3dp"
+    android:id="@+id/LLRow"
     >
     <ImageView
         android:layout_width="100dp"
         android:layout_height="73dp"
         android:src="@drawable/nfc3"/>
+
     <LinearLayout
+        android:id="@+id/LLR"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/txtTitulo_Marca"
-            android:layout_marginTop="1dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
             android:text="Marca"
+            android:textColor="@color/black"
             android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"/>
+            android:textStyle="bold" />
 
 
         <TextView
-        android:id="@+id/txtTitulo_Estado"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Estado"
-        android:textSize="13sp"
-        android:textStyle="bold"/>
+            android:id="@+id/txtTitulo_Estado"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Estado"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
         <TextView
             android:id="@+id/txtEstado"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Procesado / Pendiente"
             android:textSize="12sp"
-            android:textStyle="normal"/>
+            android:textStyle="normal" />
 
 
         <TextView
@@ -48,7 +52,14 @@
             android:layout_height="wrap_content"
             android:text="Fecha"
             android:textSize="13sp"
-            android:textStyle="normal"
-            android:layout_marginBottom="3dp"/>
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/txtImei"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp"
+            android:text="Imei"
+            android:textSize="13sp" />
     </LinearLayout>-->
 </LinearLayout>

@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.guard.security.crc.crc_guard_app.R;
@@ -109,7 +110,6 @@ public class LocalHomeActivity extends AppCompatActivity {
                 String estado = cursor.getString(cursor.getColumnIndex("ind_estado"));
                 String numSerial = cursor.getString(cursor.getColumnIndex("num_serial"));
                 list.add(new Marca(dbId, idDevice, nfcData, numSerial, horaMarca, lat, lng, estado));
-
                 cursor.moveToNext();
             }
         }
@@ -217,11 +217,26 @@ public class LocalHomeActivity extends AppCompatActivity {
                 Double.toString(gvGPS.obtenerLongitud()));
 
         registrarMarca(marca);
-        LinearLayout LocaHome = findViewById(R.id.LLNo_data);
+        ListView LocaHome = findViewById(R.id.listView);
         LocaHome.setVisibility(View.GONE);
         actualizarListView();
-    }
 
+        final TextView txtMarca = findViewById(R.id.txtImei);
+        txtMarca.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("CLICKK", "CLICK");
+            }
+        });
+
+       /* final LinearLayout txtMarca = findViewById(R.id.LLR);
+        txtMarca.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("CLICKK", "CLICK");
+            }
+        });*/
+    }
 
     public void sonarAlarma() {
         try {
@@ -286,6 +301,7 @@ public class LocalHomeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
     }
 
     @Override

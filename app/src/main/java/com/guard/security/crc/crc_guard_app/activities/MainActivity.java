@@ -62,11 +62,11 @@ public class MainActivity extends AppCompatActivity {
     //private String mURL = "http://186.96.89.66:9090/crccoding/f?p=2560:1";
     //Nicloud
     //private String mURL = "http://web.plenusa.com:8095/apex/f?p=2560:9999";
-    private String mURL = "http://186.1.32.50/proxtorapp";
+    //private String mURL = "http://186.1.32.50/proxtorapp";
     //private String mURL = "http://10.1.1.12:9090/crccoding/f?p=2560:LOGIN_DESKTOP";
     //private String mURL =  "https://androidfilehost.com/?fid=3556969557455276147";
     //Desa Externo
-    //private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
+    private String mURL = "http://201.196.88.8:9090/crccoding/f?p=2560:1";
     //IP Desa
     //private String mURL = "http://192.168.1.50:9090/crccoding/f?p=2560:1";
 
@@ -330,7 +330,9 @@ public class MainActivity extends AppCompatActivity {
                 dateFormat.format(date),
                 Double.toString(gvGPS.obtenerLatitud()),
                 Double.toString(gvGPS.obtenerLongitud()));
-        if (Procesar.Num_Pagina(gvWebView.getUrl()).equals("2")) {
+
+
+       /* if (Procesar.Num_Pagina(gvWebView.getUrl()).equals("2")) {
             gvWebView.loadUrl("javascript:receiveData_up('" + marca.getImei() + "'" +
                     ",'" + marca.getNfcData() + "'" +
                     ",'" + marca.getHoraMarca() + "'" +
@@ -338,12 +340,15 @@ public class MainActivity extends AppCompatActivity {
                     ",'" + marca.getLng() + "'" +
                     ",'" + "NFC" + "'" +
                     ",'"+ marca.getNum_serial() + "');");
-            registrarMarca(marca, "PRC");
+            //Toast.makeText(gvContext, "Marca en pagina PROCESADO pag("+Procesar.Num_Pagina(gvWebView.getUrl())+")", Toast.LENGTH_LONG).show();
+            registrarMarca(marca, "PEN");
         } else {
             registrarMarca(marca, "PEN");
-        }
+            //Toast.makeText(gvContext, "Marca en pagina PEN pag("+Procesar.Num_Pagina(gvWebView.getUrl())+")", Toast.LENGTH_LONG).show();
+        }*/
 
-
+        registrarMarca(marca, "PEN");
+        gvWebView.loadUrl("javascript:receiveData_up();");
     }
 
     public void sonarAlarma() {
